@@ -1,12 +1,35 @@
 <template>
+  <div>
+    <h2>Available Lessons</h2>
+
+    <!-- Sorting Dropdown -->
     <div>
-      <h2>Available Lessons</h2>
-      <div v-for="lesson in lessons" :key="lesson.id">
-        <LessonItem :lesson="lesson" @add-to-cart="addToCart" />
-      </div>
+      <label for="sort">Sort By:</label>
+      <select id="sort" v-model="sortBy" @change="sortLessons">
+        <option value="title">Title</option>
+        <option value="price">Price</option>
+        <option value="spaces">Spaces</option>
+      </select>
     </div>
-  </template>
-  
+
+    <!-- Search Bar -->
+    <div>
+      <label for="search">Search Lessons:</label>
+      <input
+        id="search"
+        type="text"
+        v-model="searchQuery"
+        placeholder="Search by title or location"
+        @input="filterLessons"
+      />
+    </div>
+
+    <!-- Lesson Items -->
+    <div v-for="lesson in filteredLessons" :key="lesson.id">
+      <LessonItem :lesson="lesson" @add-to-cart="addToCart" />
+    </div>
+  </div>
+</template>
 
 <script>
 import LessonItem from './LessonItem.vue';
@@ -26,15 +49,47 @@ export default {
         { id: 8, title: 'Home Economics', location: 'On-site', price: 60, spaces: 5, icon: '/icons/home-eco-icon.png' },
         { id: 9, title: 'Financial Foundations', location: 'Online', price: 22, spaces: 5, icon: '/icons/fin-icon.png' },
         { id: 10, title: 'Science Lab', location: 'On-site', price: 35, spaces: 5, icon: '/icons/lab-icon.png' }
-      ]
+      ],
+      filteredLessons: [], // Filtered lessons to display
+      sortBy: 'title', // Default sort option
+      searchQuery: '' // Search query input
     };
   },
+  created() {
+    this.filteredLessons = this.lessons; // Initialize filtered list
+  },
   methods: {
-  addToCart(lesson) {
-    console.log('LessonList.vue: Emitting add-to-cart event:', lesson);
-    this.$emit('add-to-cart', lesson);
+    sortLessons() {
+      this.filteredLessons.sort((a, b) => {
+        if (this.sortBy === 'title') {
+          return a.title.localeCompare(b.title);
+        }
+        if (this.sortBy === 'price') {
+          return a.price - b.price;
+        }
+        if (this.sortBy === 'spaces') {
+          return a.spaces - b.spaces;
+        }
+      });
+    },
+    filterLessons() {
+      const query = this.searchQuery.toLowerCase();
+      this.filteredLessons = this.lessons.filter((lesson) => {
+        return (
+          lesson.title.toLowerCase().includes(query) ||
+          lesson.location.toLowerCase().includes(query)
+        );
+      });
+      this.sortLessons(); // Sort the filtered list after filtering
+    },
+    addToCart(lesson) {
+      console.log('LessonList.vue: Emitting add-to-cart event:', lesson);
+      this.$emit('add-to-cart', lesson);
+    }
   }
-}
-
 };
 </script>
+
+<style scoped>
+
+</style>
