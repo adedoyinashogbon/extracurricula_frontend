@@ -1,27 +1,25 @@
 <template>
-    <div class="lesson-item">
-      <img :src="lesson.icon" alt="Lesson Icon" />
-      <h3>{{ lesson.title }}</h3>
-      <p>Location: {{ lesson.location }}</p>
-      <p>Price: ${{ lesson.price }}</p>
-      <p>Spaces: {{ lesson.spaces }}</p>
-      <button @click="addToCart" :disabled="lesson.spaces === 0">Add to Cart</button>
-    </div>
-  </template>
+  <div class="lesson-item">
+    <img :src="lesson.icon" alt="Lesson Icon" />
+    <h3>{{ lesson.title }}</h3>
+    <p>Location: {{ lesson.location }}</p>
+    <p>Price: ${{ lesson.price }}</p>
+    <p>Spaces: {{ lesson.spaces }}</p>
+    <button @click="addToCart" :disabled="lesson.spaces === 0">Add to Cart</button>
+  </div>
+</template>
 
 <script>
 export default {
   props: ['lesson'],
   methods: {
-  addToCart() {
-    console.log('LessonItem.vue: Emitting add-to-cart event:', this.lesson);
-    this.$emit('add-to-cart', this.lesson);
+    addToCart() {
+      console.log('LessonItem.vue: Emitting add-to-cart event:', this.lesson);
+      this.$emit('add-to-cart', this.lesson);
+    }
   }
-}
-
 };
 </script>
-
 
 <style scoped>
 .lesson-item {
@@ -46,14 +44,3 @@ export default {
   font-size: 1rem;
 }
 </style>
-
-  
-
-
-
-
-
-
-
-
-
