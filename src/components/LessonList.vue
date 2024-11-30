@@ -1,11 +1,12 @@
 <template>
-  <div>
-    <h2>Available Lessons</h2>
-    <div v-for="lesson in lessons" :key="lesson.id">
-      <LessonItem :lesson="lesson" @add-to-cart="addToCart" />
+    <div>
+      <h2>Available Lessons</h2>
+      <div v-for="lesson in lessons" :key="lesson.id">
+        <LessonItem :lesson="lesson" @add-to-cart="addToCart" />
+      </div>
     </div>
-  </div>
-</template>
+  </template>
+  
 
 <script>
 import LessonItem from './LessonItem.vue';
@@ -29,10 +30,11 @@ export default {
     };
   },
   methods: {
-    addToCart(lesson) {
-      console.log('LessonList.vue: Emitting add-to-cart event:', lesson);
-      this.$emit('add-to-cart', lesson);
-    }
+  addToCart(lesson) {
+    console.log('LessonList.vue: Emitting add-to-cart event:', lesson);
+    this.$emit('add-to-cart', lesson);
   }
+}
+
 };
 </script>

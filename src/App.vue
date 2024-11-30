@@ -21,21 +21,22 @@ export default {
     };
   },
   methods: {
-    addToCart(lesson) {
-      console.log('App.vue: Adding to cart:', lesson);
-      this.cart.push(lesson); // Add the lesson to the cart
-    },
-    removeFromCart(id) {
-      console.log('App.vue: Removing from cart item with id:', id);
-      this.cart = this.cart.filter(item => item.id !== id); // Remove the item
-    },
-    handleCheckout() {
-      console.log('App.vue: Proceeding to checkout with items:', this.cart);
-    },
-    checkoutComplete(orderDetails) {
-      console.log('App.vue: Checkout completed with details:', orderDetails);
-      this.cart = []; // Clear the cart
-    }
-  }
+  addToCart(lesson) {
+    console.log('App.vue: Adding to cart:', lesson);
+    this.cart.push(lesson); // Add the lesson to the cart
+  },
+  removeFromCart(id) {
+    console.log('App.vue: Removing from cart item with id:', id);
+    this.cart = this.cart.filter(item => item.id !== id); // Remove the item
+  },
+  handleCheckout() {
+    console.log('App.vue: Proceeding to checkout with items:', this.cart);
+  },
+  checkoutComplete(orderDetails) {
+    console.log('App.vue: Checkout completed with details:', orderDetails);
+    this.cart = []; // Clear the cart
+  } 
+}
+
 };
 </script>
