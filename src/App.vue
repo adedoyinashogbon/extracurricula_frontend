@@ -5,6 +5,7 @@
       :cartItems="cart" 
       @remove-from-cart="removeFromCart" 
       @proceed-checkout="handleCheckout" 
+      @order-completed="checkoutComplete"
     />
   </div>
 </template>
@@ -31,6 +32,10 @@ export default {
     },
     handleCheckout() {
       console.log('App.vue: Proceeding to checkout with items:', this.cart);
+    },
+    checkoutComplete(orderDetails) {
+      console.log('App.vue: Checkout completed with details:', orderDetails);
+      this.cart = []; // Clear the cart
     }
   }
 };

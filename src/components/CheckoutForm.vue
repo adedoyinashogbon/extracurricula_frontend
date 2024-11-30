@@ -36,7 +36,7 @@ export default {
     return {
       name: '',
       phone: '',
-      orderSuccess: false
+      orderSuccess: false,
     };
   },
   computed: {
@@ -49,19 +49,32 @@ export default {
   },
   methods: {
     submitOrder() {
-      if (this.isFormValid) {
-        console.log('Submitting order with:', {
-          name: this.name,
-          phone: this.phone
-        });
-        this.orderSuccess = true; // Simulate success
-        this.name = '';
-        this.phone = '';
-        this.$emit('order-placed');
-      } else {
-        console.log('Form validation failed.');
-      }
-    }
+  if (this.isFormValid) {
+    console.log('Submitting order with:', { name: this.name, phone: this.phone });
+    this.orderSuccess = true; // Show success message
+
+    // Force Vue to update the DOM
+    this.$forceUpdate();
+
+     // Ensure reactivity
+     this.$nextTick(() => {
+      console.log('Reactivity ensured. Success message should display now.');
+    });
+
+    // Hide the success message after 3 seconds
+    //setTimeout(() => {
+     // this.orderSuccess = false;
+    //}, 3000);
+
+    this.$emit('order-placed', { name: this.name, phone: this.phone });
+    this.name = '';
+    this.phone = '';
+  } else {
+    console.log('Form validation failed.');
+  }
+}
+
+
   }
 };
 </script>
@@ -107,6 +120,8 @@ export default {
   color: #28a745;
   font-weight: bold;
   margin-top: 10px;
+  background-color: yellow;
+  display: block !important;
 }
 </style>
 

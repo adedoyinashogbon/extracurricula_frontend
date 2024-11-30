@@ -35,11 +35,12 @@ export default {
     console.log('ShoppingCart.vue: Toggling checkout form');
     this.isCheckout = !this.isCheckout;
   },
-  completeOrder() {
-    console.log('ShoppingCart.vue: Order completed');
-    this.isCheckout = false;
-    this.$emit('order-completed');
-  }
+  completeOrder(orderDetails) {
+  console.log('ShoppingCart.vue: Order completed with details:', orderDetails);
+  this.isCheckout = false; // Close the checkout form
+  this.$emit('order-completed', orderDetails); // Emit event with order details
+}
+
 }
 
 };
