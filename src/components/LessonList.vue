@@ -103,9 +103,15 @@ export default {
       this.sortLessons(); // Sort the filtered list after filtering
     },
     addToCart(lesson) {
-      console.log('LessonList.vue: Emitting add-to-cart event:', lesson);
-      this.$emit('add-to-cart', lesson);
-    }
+  if (lesson.spaces > 0) {
+    console.log('LessonList.vue: Emitting add-to-cart event:', lesson);
+    lesson.spaces -= 1; // Decrement the available spaces
+    this.$emit('add-to-cart', lesson);
+  } else {
+    console.log('LessonList.vue: No spaces available for:', lesson.title);
+  }
+}
+
   }
 };
 </script>
