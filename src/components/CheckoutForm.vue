@@ -48,21 +48,19 @@ export default {
     }
   },
   methods: {
-    submitOrder() {
-      if (this.isFormValid) {
-        console.log('Submitting order with:', {
-          name: this.name,
-          phone: this.phone
-        });
-        this.orderSuccess = true; // Simulate success
-        this.name = '';
-        this.phone = '';
-        this.$emit('order-placed');
-      } else {
-        console.log('Form validation failed.');
-      }
+  submitOrder() {
+    if (this.isFormValid) {
+      console.log('Order submitted:', { name: this.name, phone: this.phone });
+      this.$emit('order-placed', { name: this.name, phone: this.phone });
+      this.name = ''; // Reset form fields
+      this.phone = '';
+      this.orderSuccess = true; // Display success message
+    } else {
+      console.log('Form validation failed.');
     }
   }
+}
+
 };
 </script>
 

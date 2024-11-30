@@ -14,38 +14,34 @@
   </div>
 </template>
 
-
 <script>
 import CheckoutForm from './CheckoutForm.vue';
 
 export default {
   components: { CheckoutForm },
-  props: ['cartItems'],
+  props: ['cartItems'], // Receives the cart items from App.vue
   data() {
     return {
-      isCheckout: false // Tracks whether the checkout form is displayed
+      isCheckout: false // Controls visibility of the checkout form
     };
   },
   methods: {
-  removeFromCart(id) {
-    console.log('ShoppingCart.vue: Emitting remove-from-cart event for id:', id);
-    this.$emit('remove-from-cart', id);
-  },
-  toggleCheckout() {
-    console.log('ShoppingCart.vue: Toggling checkout form');
-    this.isCheckout = !this.isCheckout;
-  },
-  completeOrder() {
-    console.log('ShoppingCart.vue: Order completed');
-    this.isCheckout = false;
-    this.$emit('order-completed');
+    removeFromCart(id) {
+      console.log('ShoppingCart.vue: Removing item with id:', id);
+      this.$emit('remove-from-cart', id); // Notify parent to remove item
+    },
+    toggleCheckout() {
+      console.log('ShoppingCart.vue: Toggling checkout form');
+      this.isCheckout = !this.isCheckout;
+    },
+    completeOrder(orderDetails) {
+      console.log('ShoppingCart.vue: Order completed:', orderDetails);
+      this.isCheckout = false; // Hide checkout form
+      this.$emit('order-completed', orderDetails); // Notify parent
+    }
   }
-}
-
 };
 </script>
-
-
 
 <style scoped>
 .shopping-cart {
@@ -80,4 +76,3 @@ export default {
   cursor: not-allowed;
 }
 </style>
-
