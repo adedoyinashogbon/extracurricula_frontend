@@ -13,10 +13,12 @@
 export default {
   props: ['lesson'],
   methods: {
-    addToCart() {
-      this.$emit('add-to-cart', this.lesson);
-    }
+  addToCart() {
+    console.log('LessonItem.vue: Emitting add-to-cart event:', this.lesson);
+    this.$emit('add-to-cart', this.lesson);
   }
+}
+
 };
 </script>
 

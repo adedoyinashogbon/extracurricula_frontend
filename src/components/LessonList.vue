@@ -30,9 +30,11 @@ export default {
     };
   },
   methods: {
-    addToCart(lesson) {
-      console.log(`Adding lesson to cart: ${lesson.title}`);
-    }
+  addToCart(lesson) {
+    console.log('LessonList.vue: Emitting add-to-cart event:', lesson);
+    this.$emit('add-to-cart', lesson);
   }
+}
+
 };
 </script>
