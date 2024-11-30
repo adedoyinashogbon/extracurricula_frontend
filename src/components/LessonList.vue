@@ -10,6 +10,9 @@
         <option value="price">Price</option>
         <option value="spaces">Spaces</option>
       </select>
+      <button @click="toggleSortOrder">
+        {{ isAscending ? 'Ascending' : 'Descending' }}
+      </button>
     </div>
 
     <!-- Search Bar -->
@@ -52,6 +55,7 @@ export default {
       ],
       filteredLessons: [], // Filtered lessons to display
       sortBy: 'title', // Default sort option
+      isAscending: true, // Sort order toggle
       searchQuery: '' // Search query input
     };
   },
@@ -61,16 +65,22 @@ export default {
   methods: {
     sortLessons() {
       this.filteredLessons.sort((a, b) => {
+        let comparison = 0;
         if (this.sortBy === 'title') {
-          return a.title.localeCompare(b.title);
+          comparison = a.title.localeCompare(b.title);
+        } else if (this.sortBy === 'price') {
+          comparison = a.price - b.price;
+        } else if (this.sortBy === 'spaces') {
+          comparison = a.spaces - b.spaces;
         }
-        if (this.sortBy === 'price') {
-          return a.price - b.price;
-        }
-        if (this.sortBy === 'spaces') {
-          return a.spaces - b.spaces;
-        }
+
+        // Adjust for ascending/descending
+        return this.isAscending ? comparison : -comparison;
       });
+    },
+    toggleSortOrder() {
+      this.isAscending = !this.isAscending; // Toggle sort order
+      this.sortLessons(); // Re-sort lessons
     },
     filterLessons() {
       const query = this.searchQuery.toLowerCase();
@@ -91,5 +101,5 @@ export default {
 </script>
 
 <style scoped>
-
+/* Add styles if necessary */
 </style>
