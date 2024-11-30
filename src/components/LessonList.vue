@@ -2,29 +2,38 @@
   <div>
     <h2>Available Lessons</h2>
 
-    <!-- Sorting Dropdown -->
-    <div>
-      <label for="sort">Sort By:</label>
-      <select id="sort" v-model="sortBy" @change="sortLessons">
-        <option value="title">Title</option>
-        <option value="price">Price</option>
-        <option value="spaces">Spaces</option>
-      </select>
-      <button @click="toggleSortOrder">
-        {{ isAscending ? 'Ascending' : 'Descending' }}
-      </button>
-    </div>
+    <!-- Sorting and Filtering Options -->
+    <div class="sort-filter-container">
+      <!-- Sorting Dropdown -->
+      <div>
+        <label for="sort">Sort By:</label>
+        <select id="sort" v-model="sortBy" @change="sortLessons">
+          <option value="title">Title</option>
+          <option value="price">Price</option>
+          <option value="spaces">Spaces</option>
+        </select>
+      </div>
 
-    <!-- Search Bar -->
-    <div>
-      <label for="search">Search Lessons:</label>
-      <input
-        id="search"
-        type="text"
-        v-model="searchQuery"
-        placeholder="Search by title or location"
-        @input="filterLessons"
-      />
+      <!-- Toggle Sort Order -->
+      <div>
+        <button @click="toggleSortOrder">
+  <i :class="isAscending ? 'fas fa-sort-amount-up' : 'fas fa-sort-amount-down'"></i>
+  {{ isAscending ? 'Ascending' : 'Descending' }}
+</button>
+
+      </div>
+
+      <!-- Search Bar -->
+      <div>
+        <label for="search">Search:</label>
+        <input
+          id="search"
+          type="text"
+          v-model="searchQuery"
+          placeholder="Search lessons..."
+          @input="filterLessons"
+        />
+      </div>
     </div>
 
     <!-- Lesson Items -->
@@ -33,6 +42,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 import LessonItem from './LessonItem.vue';
@@ -101,5 +111,44 @@ export default {
 </script>
 
 <style scoped>
-/* Add styles if necessary */
+/* Styling the sorting and filtering options */
+.sort-filter-container {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.sort-filter-container label {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.sort-filter-container select,
+.sort-filter-container input {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.sort-filter-container button {
+  padding: 5px 10px;
+  border: 1px solid #007bff;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.sort-filter-container button:hover {
+  background-color: #0056b3;
+}
+
+.sort-filter-container button:focus {
+  outline: none;
+  box-shadow: 0 0 4px #007bff;
+}
+
 </style>
