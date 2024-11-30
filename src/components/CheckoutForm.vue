@@ -51,28 +51,21 @@ export default {
     submitOrder() {
   if (this.isFormValid) {
     console.log('Submitting order with:', { name: this.name, phone: this.phone });
-    this.orderSuccess = true; // Show success message
 
-    // Force Vue to update the DOM
-    this.$forceUpdate();
+    // Show an alert for the success message
+    alert('Order successfully placed!');
 
-     // Ensure reactivity
-     this.$nextTick(() => {
-      console.log('Reactivity ensured. Success message should display now.');
-    });
-
-    // Hide the success message after 3 seconds
-    //setTimeout(() => {
-     // this.orderSuccess = false;
-    //}, 3000);
-
+    // Emit order details to the parent
     this.$emit('order-placed', { name: this.name, phone: this.phone });
+
+    // Clear form fields
     this.name = '';
     this.phone = '';
   } else {
     console.log('Form validation failed.');
   }
 }
+
 
 
   }
