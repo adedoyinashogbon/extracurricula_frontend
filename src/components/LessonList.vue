@@ -17,10 +17,9 @@
       <!-- Toggle Sort Order -->
       <div>
         <button @click="toggleSortOrder">
-  <i :class="isAscending ? 'fas fa-sort-amount-up' : 'fas fa-sort-amount-down'"></i>
-  {{ isAscending ? 'Ascending' : 'Descending' }}
-</button>
-
+          <i :class="isAscending ? 'fas fa-sort-amount-up' : 'fas fa-sort-amount-down'"></i>
+          {{ isAscending ? 'Ascending' : 'Descending' }}
+        </button>
       </div>
 
       <!-- Search Bar -->
@@ -37,12 +36,11 @@
     </div>
 
     <!-- Lesson Items -->
-    <div v-for="lesson in filteredLessons" :key="lesson.id">
+    <div v-for="lesson in filteredLessons" :key="lesson._id">
       <LessonItem :lesson="lesson" @add-to-cart="addToCart" />
     </div>
   </div>
 </template>
-
 
 <script>
 import LessonItem from './LessonItem.vue';
@@ -51,18 +49,7 @@ export default {
   components: { LessonItem },
   data() {
     return {
-      lessons: [
-        { id: 1, title: 'Mathematics', location: 'Online', price: 20, spaces: 5, icon: process.env.BASE_URL + 'icons/math-icon.png' },
-        { id: 2, title: 'Intro Tech', location: 'On-site', price: 25, spaces: 5, icon: process.env.BASE_URL + 'icons/intro-tech-icon.png' },
-        { id: 3, title: 'Civic Education and African History', location: 'Online', price: 15, spaces: 5, icon: process.env.BASE_URL + 'icons/Civics-icon.png' },
-        { id: 4, title: 'Art and Craft', location: 'On-site', price: 30, spaces: 5, icon: process.env.BASE_URL + 'icons/art-craft-icon.png' },
-        { id: 5, title: 'English Language', location: 'Online', price: 40, spaces: 5, icon: process.env.BASE_URL + 'icons/english-icon.png' },
-        { id: 6, title: 'Introduction to Music Theory', location: 'On-site', price: 18, spaces: 5, icon: process.env.BASE_URL + 'icons/music-icon.png' },
-        { id: 7, title: 'Programming Basics', location: 'Online', price: 50, spaces: 5, icon: process.env.BASE_URL + 'icons/prog-icon.png' },
-        { id: 8, title: 'Home Economics', location: 'On-site', price: 60, spaces: 5, icon: process.env.BASE_URL + 'icons/home-eco-icon.png' },
-        { id: 9, title: 'Financial Foundations', location: 'Online', price: 22, spaces: 5, icon: process.env.BASE_URL + 'icons/fin-icon.png' },
-        { id: 10, title: 'Science Lab', location: 'On-site', price: 35, spaces: 5, icon: process.env.BASE_URL + 'icons/lab-icon.png' }
-      ],
+      lessons: [], // Lessons fetched from the backend
       filteredLessons: [], // Filtered lessons to display
       sortBy: 'title', // Default sort option
       isAscending: true, // Sort order toggle
@@ -70,9 +57,19 @@ export default {
     };
   },
   created() {
-    this.filteredLessons = this.lessons; // Initialize filtered list
+    this.fetchLessons(); // Fetch lessons on component creation
   },
   methods: {
+    async fetchLessons() {
+      try {
+        const response = await fetch('http://localhost:5000/api/lessons'); // Replace with your backend URL
+        const data = await response.json();
+        this.lessons = data;
+        this.filteredLessons = data; // Initialize filtered lessons with fetched data
+      } catch (error) {
+        console.error('Error fetching lessons:', error);
+      }
+    },
     sortLessons() {
       this.filteredLessons.sort((a, b) => {
         let comparison = 0;
@@ -103,15 +100,14 @@ export default {
       this.sortLessons(); // Sort the filtered list after filtering
     },
     addToCart(lesson) {
-  if (lesson.spaces > 0) {
-    console.log('LessonList.vue: Emitting add-to-cart event:', lesson);
-    lesson.spaces -= 1; // Decrement the available spaces
-    this.$emit('add-to-cart', lesson);
-  } else {
-    console.log('LessonList.vue: No spaces available for:', lesson.title);
-  }
-}
-
+      if (lesson.spaces > 0) {
+        console.log('LessonList.vue: Emitting add-to-cart event:', lesson);
+        lesson.spaces -= 1; // Decrement the available spaces
+        this.$emit('add-to-cart', lesson);
+      } else {
+        console.log('LessonList.vue: No spaces available for:', lesson.title);
+      }
+    }
   }
 };
 </script>
@@ -156,5 +152,4 @@ export default {
   outline: none;
   box-shadow: 0 0 4px #007bff;
 }
-
 </style>
