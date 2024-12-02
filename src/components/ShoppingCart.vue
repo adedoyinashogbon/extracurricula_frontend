@@ -7,46 +7,25 @@
         <button @click="removeFromCart(item.id)">Remove</button>
       </li>
     </ul>
-    <button v-if="cartItems.length" @click="toggleCheckout">Proceed to Checkout</button>
-
-    <!-- Checkout Form -->
-    <CheckoutForm v-if="isCheckout" @order-placed="completeOrder" />
+    <button v-if="cartItems.length" @click="proceedToCheckout">Proceed to Checkout</button>
   </div>
 </template>
 
-
 <script>
-import CheckoutForm from './CheckoutForm.vue';
-
 export default {
-  components: { CheckoutForm },
   props: ['cartItems'],
-  data() {
-    return {
-      isCheckout: false // Tracks whether the checkout form is displayed
-    };
-  },
   methods: {
-  removeFromCart(id) {
-    console.log('ShoppingCart.vue: Emitting remove-from-cart event for id:', id);
-    this.$emit('remove-from-cart', id);
-  },
-  toggleCheckout() {
-    console.log('ShoppingCart.vue: Toggling checkout form');
-    this.isCheckout = !this.isCheckout;
-  },
-  completeOrder(orderDetails) {
-  console.log('ShoppingCart.vue: Order completed with details:', orderDetails);
-  this.isCheckout = false; // Close the checkout form
-  this.$emit('order-completed', orderDetails); // Emit event with order details
-}
-
-}
-
+    removeFromCart(id) {
+      console.log('ShoppingCart.vue: Emitting remove-from-cart event for id:', id);
+      this.$emit('remove-from-cart', id);
+    },
+    proceedToCheckout() {
+      console.log('ShoppingCart.vue: Emitting proceed-checkout event');
+      this.$emit('proceed-checkout'); // Notify parent to show checkout
+    }
+  }
 };
 </script>
-
-
 
 <style scoped>
 .shopping-cart {
@@ -81,4 +60,3 @@ export default {
   cursor: not-allowed;
 }
 </style>
-

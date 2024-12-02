@@ -1,34 +1,38 @@
 <template>
-    <div class="checkout-form">
-      <h2>Checkout</h2>
-      <form @submit.prevent="submitOrder">
-        <div>
-          <label for="name">Name:</label>
-          <input
-            type="text"
-            id="name"
-            v-model="name"
-            placeholder="Enter your name"
-            required
-          />
-        </div>
-        <div>
-          <label for="phone">Phone:</label>
-          <input
-            type="text"
-            id="phone"
-            v-model="phone"
-            placeholder="Enter your phone number"
-            required
-          />
-        </div>
-        <button type="submit" :disabled="!isFormValid">Place Order</button>
-      </form>
-      <p v-if="orderSuccess" class="success-message">
-        Order successfully placed!
-      </p>
-    </div>
-  </template>
+  <div class="checkout-form">
+    <h2>Checkout</h2>
+    <form @submit.prevent="submitOrder">
+      <div>
+        <label for="name">Name:</label>
+        <input
+          type="text"
+          id="name"
+          v-model="name"
+          placeholder="Enter your name"
+          required
+        />
+      </div>
+      <div>
+        <label for="phone">Phone:</label>
+        <input
+          type="text"
+          id="phone"
+          v-model="phone"
+          placeholder="Enter your phone number"
+          required
+        />
+      </div>
+      <button type="submit" :disabled="!isFormValid">Place Order</button>
+    </form>
+
+    <!-- Back to Cart Button -->
+    <button class="back-button" @click="backToCart">Back to Cart</button>
+
+    <p v-if="orderSuccess" class="success-message">
+      Order successfully placed!
+    </p>
+  </div>
+</template>
 
 <script>
 export default {
@@ -36,12 +40,11 @@ export default {
     return {
       name: '',
       phone: '',
-      orderSuccess: false,
+      orderSuccess: false
     };
   },
   computed: {
     isFormValid() {
-      // Validate name and phone fields
       const nameValid = /^[a-zA-Z\s]+$/.test(this.name); // Letters and spaces only
       const phoneValid = /^[0-9]+$/.test(this.phone); // Numbers only
       return nameValid && phoneValid;
@@ -49,25 +52,20 @@ export default {
   },
   methods: {
     submitOrder() {
-  if (this.isFormValid) {
-    console.log('Submitting order with:', { name: this.name, phone: this.phone });
-
-    // Show an alert for the success message
-    alert('Order successfully placed!');
-
-    // Emit order details to the parent
-    this.$emit('order-placed', { name: this.name, phone: this.phone });
-
-    // Clear form fields
-    this.name = '';
-    this.phone = '';
-  } else {
-    console.log('Form validation failed.');
-  }
-}
-
-
-
+      if (this.isFormValid) {
+        console.log('Submitting order with:', { name: this.name, phone: this.phone });
+        this.orderSuccess = true;
+        this.name = '';
+        this.phone = '';
+        this.$emit('order-placed');
+      } else {
+        console.log('Form validation failed.');
+      }
+    },
+    backToCart() {
+      console.log('CheckoutForm.vue: Emitting cancel-checkout event');
+      this.$emit('cancel-checkout'); // Emit event to navigate back to cart
+    }
   }
 };
 </script>
@@ -97,11 +95,16 @@ export default {
 
 .checkout-form button {
   padding: 10px 15px;
+  margin: 10px 5px;
   background-color: #28a745;
   color: white;
   border: none;
   border-radius: 3px;
   cursor: pointer;
+}
+
+.checkout-form button.back-button {
+  background-color: #007bff;
 }
 
 .checkout-form button:disabled {
@@ -113,9 +116,5 @@ export default {
   color: #28a745;
   font-weight: bold;
   margin-top: 10px;
-  background-color: yellow;
-  display: block !important;
 }
 </style>
-
-  
