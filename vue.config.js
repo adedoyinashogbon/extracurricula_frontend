@@ -1,3 +1,5 @@
-module.exports = {
-  publicPath: '/extracurricula_frontend/'
-};
+const { defineConfig } = require('@vue/cli-service');
+module.exports = defineConfig({
+  transpileDependencies: true,
+  publicPath: '/extracurricula_frontend/' 
+});

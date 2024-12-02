@@ -5,7 +5,9 @@
       <p>Location: {{ lesson.location }}</p>
       <p>Price: ${{ lesson.price }}</p>
       <p>Spaces: {{ lesson.spaces }}</p>
-      <button @click="addToCart" :disabled="lesson.spaces === 0">Add to Cart</button>
+      <button @click="addToCart" :disabled="lesson.spaces === 0">
+        Add to Cart
+      </button>
     </div>
   </template>
 
