@@ -2,38 +2,30 @@
   <div>
     <h2>Available Lessons</h2>
 
-    <!-- Sorting and Filtering Options -->
-    <div class="sort-filter-container">
-      <!-- Sorting Dropdown -->
-      <div>
-        <label for="sort">Sort By:</label>
-        <select id="sort" v-model="sortBy" @change="sortLessons">
-          <option value="title">Title</option>
-          <option value="price">Price</option>
-          <option value="spaces">Spaces</option>
-        </select>
-      </div>
+    <!-- Sorting Options -->
+    <div class="lesson-controls">
+      <label for="sort">Sort By:</label>
+      <select id="sort" v-model="sortBy" @change="sortLessons">
+        <option value="title">Title</option>
+        <option value="price">Price</option>
+        <option value="spaces">Spaces</option>
+      </select>
+      <button @click="toggleSortOrder">
+        <i :class="isAscending ? 'fas fa-sort-amount-up' : 'fas fa-sort-amount-down'"></i>
+        {{ isAscending ? 'Ascending' : 'Descending' }}
+      </button>
+    </div>
 
-      <!-- Toggle Sort Order -->
-      <div>
-        <button @click="toggleSortOrder">
-  <i :class="isAscending ? 'fas fa-sort-amount-up' : 'fas fa-sort-amount-down'"></i>
-  {{ isAscending ? 'Ascending' : 'Descending' }}
-</button>
-
-      </div>
-
-      <!-- Search Bar -->
-      <div>
-        <label for="search">Search:</label>
-        <input
-          id="search"
-          type="text"
-          v-model="searchQuery"
-          placeholder="Search lessons..."
-          @input="filterLessons"
-        />
-      </div>
+    <!-- Search Bar -->
+    <div class="lesson-controls">
+      <label for="search">Search Lessons:</label>
+      <input
+        id="search"
+        type="text"
+        v-model="searchQuery"
+        placeholder="Search by title or location"
+        @input="filterLessons"
+      />
     </div>
 
     <!-- Lesson Items -->
@@ -43,7 +35,6 @@
   </div>
 </template>
 
-
 <script>
 import LessonItem from './LessonItem.vue';
 
@@ -51,110 +42,110 @@ export default {
   components: { LessonItem },
   data() {
     return {
-      lessons: [
-        { id: 1, title: 'Mathematics', location: 'Online', price: 20, spaces: 5, icon: process.env.BASE_URL + 'icons/math-icon.png' },
-        { id: 2, title: 'Intro Tech', location: 'On-site', price: 25, spaces: 5, icon: process.env.BASE_URL + 'icons/intro-tech-icon.png' },
-        { id: 3, title: 'Civic Education and African History', location: 'Online', price: 15, spaces: 5, icon: process.env.BASE_URL + 'icons/Civics-icon.png' },
-        { id: 4, title: 'Art and Craft', location: 'On-site', price: 30, spaces: 5, icon: process.env.BASE_URL + 'icons/art-craft-icon.png' },
-        { id: 5, title: 'English Language', location: 'Online', price: 40, spaces: 5, icon: process.env.BASE_URL + 'icons/english-icon.png' },
-        { id: 6, title: 'Introduction to Music Theory', location: 'On-site', price: 18, spaces: 5, icon: process.env.BASE_URL + 'icons/music-icon.png' },
-        { id: 7, title: 'Programming Basics', location: 'Online', price: 50, spaces: 5, icon: process.env.BASE_URL + 'icons/prog-icon.png' },
-        { id: 8, title: 'Home Economics', location: 'On-site', price: 60, spaces: 5, icon: process.env.BASE_URL + 'icons/home-eco-icon.png' },
-        { id: 9, title: 'Financial Foundations', location: 'Online', price: 22, spaces: 5, icon: process.env.BASE_URL + 'icons/fin-icon.png' },
-        { id: 10, title: 'Science Lab', location: 'On-site', price: 35, spaces: 5, icon: process.env.BASE_URL + 'icons/lab-icon.png' }
-      ],
-      filteredLessons: [], // Filtered lessons to display
-      sortBy: 'title', // Default sort option
-      isAscending: true, // Sort order toggle
-      searchQuery: '' // Search query input
+      lessons: [], // Fetched from backend
+      filteredLessons: [],
+      sortBy: 'title',
+      isAscending: true,
+      searchQuery: '',
     };
   },
   created() {
-    this.filteredLessons = this.lessons; // Initialize filtered list
+    this.fetchLessons();
   },
   methods: {
+    async fetchLessons() {
+      try {
+        const response = await fetch('http://localhost:4000/lessons');
+        const data = await response.json();
+        this.lessons = data.map((lesson) => ({
+          ...lesson,
+          icon: `/icons/${lesson.icon}`, // Reference image from public/icons
+        }));
+        this.filteredLessons = [...this.lessons];
+      } catch (error) {
+        console.error('Error fetching lessons:', error);
+      }
+    },
     sortLessons() {
+      const multiplier = this.isAscending ? 1 : -1;
       this.filteredLessons.sort((a, b) => {
-        let comparison = 0;
-        if (this.sortBy === 'title') {
-          comparison = a.title.localeCompare(b.title);
-        } else if (this.sortBy === 'price') {
-          comparison = a.price - b.price;
-        } else if (this.sortBy === 'spaces') {
-          comparison = a.spaces - b.spaces;
-        }
-
-        // Adjust for ascending/descending
-        return this.isAscending ? comparison : -comparison;
+        if (this.sortBy === 'title') return multiplier * a.title.localeCompare(b.title);
+        return multiplier * (a[this.sortBy] - b[this.sortBy]);
       });
     },
     toggleSortOrder() {
-      this.isAscending = !this.isAscending; // Toggle sort order
-      this.sortLessons(); // Re-sort lessons
+      this.isAscending = !this.isAscending;
+      this.sortLessons();
     },
     filterLessons() {
       const query = this.searchQuery.toLowerCase();
-      this.filteredLessons = this.lessons.filter((lesson) => {
-        return (
-          lesson.title.toLowerCase().includes(query) ||
-          lesson.location.toLowerCase().includes(query)
-        );
-      });
-      this.sortLessons(); // Sort the filtered list after filtering
+      this.filteredLessons = this.lessons.filter((lesson) =>
+        lesson.title.toLowerCase().includes(query) || lesson.location.toLowerCase().includes(query)
+      );
+      this.sortLessons();
     },
     addToCart(lesson) {
-  if (lesson.spaces > 0) {
-    console.log('LessonList.vue: Emitting add-to-cart event:', lesson);
-    lesson.spaces -= 1; // Decrement the available spaces
-    this.$emit('add-to-cart', lesson);
-  } else {
-    console.log('LessonList.vue: No spaces available for:', lesson.title);
-  }
-}
-
-  }
+      if (lesson.spaces > 0) {
+        lesson.spaces -= 1; // Reduce spaces
+        this.$emit('add-to-cart', lesson);
+      }
+    },
+  },
 };
 </script>
 
 <style scoped>
-/* Styling the sorting and filtering options */
-.sort-filter-container {
+/* Container for the lesson list and controls */
+.lesson-list {
+  margin: 20px 0;
+}
+
+.lesson-controls {
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap; /* Allow wrapping for small screens */
   align-items: center;
-  margin-bottom: 15px;
+  gap: 10px; /* Add spacing between controls */
+  margin-bottom: 20px; /* Add spacing below controls */
 }
 
-.sort-filter-container label {
-  font-weight: bold;
-  margin-right: 10px;
+.lesson-controls label {
+  font-weight: bold; /* Emphasize labels */
+  margin-right: 5px;
 }
 
-.sort-filter-container select,
-.sort-filter-container input {
-  padding: 5px 10px;
+.lesson-controls input,
+.lesson-controls select {
+  padding: 8px;
+  font-size: 0.9rem;
   border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 1rem;
+  transition: border-color 0.2s ease;
 }
 
-.sort-filter-container button {
-  padding: 5px 10px;
-  border: 1px solid #007bff;
+.lesson-controls input:focus,
+.lesson-controls select:focus {
+  border-color: #007bff; /* Highlight on focus */
+  outline: none; /* Remove default outline */
+}
+
+button {
+  margin: 5px;
+  padding: 10px 15px; /* Increased padding for larger click area */
   background-color: #007bff;
   color: white;
+  border: none;
   border-radius: 4px;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease; /* Smooth hover effects */
 }
 
-.sort-filter-container button:hover {
+button:hover {
   background-color: #0056b3;
+  transform: scale(1.05); /* Slightly larger on hover */
 }
 
-.sort-filter-container button:focus {
-  outline: none;
-  box-shadow: 0 0 4px #007bff;
+button:active {
+  transform: scale(0.98); /* Slightly smaller on click */
 }
-
 </style>
