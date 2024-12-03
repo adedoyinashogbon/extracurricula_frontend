@@ -55,7 +55,7 @@ export default {
   methods: {
     async fetchLessons() {
   try {
-    const response = await fetch('https://35.177.209.72:4000/lessons'); // Backend URL
+    const response = await fetch('http://35.177.209.72:4000/lessons'); // Backend URL
     const data = await response.json();
     this.lessons = data.map((lesson) => ({
       ...lesson,
