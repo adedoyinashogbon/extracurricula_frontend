@@ -54,19 +54,19 @@ export default {
   },
   methods: {
     async fetchLessons() {
-      try {
-        const response = await fetch('http://35.177.209.72:4000/lessons');
-
-        const data = await response.json();
-        this.lessons = data.map((lesson) => ({
-          ...lesson,
-          icon: `/icons/${lesson.icon}`, // Reference images from public/icons
-        }));
-        this.filteredLessons = [...this.lessons];
-      } catch (error) {
-        console.error('Error fetching lessons:', error);
-      }
-    },
+  try {
+    const response = await fetch('http://35.177.209.72:4000/lessons'); // Backend URL
+    const data = await response.json();
+    this.lessons = data.map((lesson) => ({
+      ...lesson,
+      icon: `/icons/${lesson.icon}`,
+    }));
+    this.filteredLessons = [...this.lessons];
+  } catch (error) {
+    console.error('Error fetching lessons:', error);
+  }
+}
+,
     sortLessons() {
       const multiplier = this.isAscending ? 1 : -1;
       this.filteredLessons.sort((a, b) => {

@@ -40,25 +40,30 @@ export default {
     return {
       cart: [], // Stores items in the cart
       isCheckingOut: false, // Tracks whether the checkout page is visible
-      backendUrl: 'http://35.177.209.72:4000' // Centralized backend URL
+      backendUrl: 'http://35.177.209.72:4000' // Hardcoded backend URL
     };
   },
   methods: {
     addToCart(lesson) {
+      console.log('App.vue: Adding to cart:', lesson);
       this.cart.push(lesson);
     },
     removeFromCart(id) {
+      console.log('App.vue: Removing from cart item with id:', id);
       this.cart = this.cart.filter(item => item.id !== id);
     },
     showCheckoutPage() {
-      this.isCheckingOut = true;
+      console.log('App.vue: Proceeding to checkout');
+      this.isCheckingOut = true; // Show only checkout page
     },
     completeOrder() {
+      console.log('App.vue: Order completed');
       this.cart = []; // Clear the cart
       this.isCheckingOut = false; // Return to lesson list
     },
     cancelCheckout() {
-      this.isCheckingOut = false;
+      console.log('App.vue: Returning to cart');
+      this.isCheckingOut = false; // Navigate back to cart
     }
   }
 };
