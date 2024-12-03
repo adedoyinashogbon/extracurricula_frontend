@@ -9,9 +9,10 @@
 
     <!-- Show LessonList and ShoppingCart if not checking out -->
     <div v-if="!isCheckingOut">
-      <LessonList @add-to-cart="addToCart" />
+      <LessonList :backendUrl="backendUrl" @add-to-cart="addToCart" />
       <ShoppingCart 
         :cartItems="cart" 
+        :backendUrl="backendUrl"
         @remove-from-cart="removeFromCart" 
         @proceed-checkout="showCheckoutPage" 
       />
@@ -21,6 +22,7 @@
     <CheckoutForm 
       v-else 
       :cartItems="cart"
+      :backendUrl="backendUrl"
       @order-placed="completeOrder" 
       @back-to-cart="cancelCheckout" 
     />
@@ -38,6 +40,7 @@ export default {
     return {
       cart: [], // Stores items in the cart
       isCheckingOut: false, // Tracks whether the checkout page is visible
+      backendUrl: 'http://35.177.209.72:4000' // Centralized backend URL
     };
   },
   methods: {

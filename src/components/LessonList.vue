@@ -55,7 +55,8 @@ export default {
   methods: {
     async fetchLessons() {
       try {
-        const response = await fetch('http://localhost:4000/lessons');
+        const response = await fetch('http://35.177.209.72:4000/lessons');
+
         const data = await response.json();
         this.lessons = data.map((lesson) => ({
           ...lesson,

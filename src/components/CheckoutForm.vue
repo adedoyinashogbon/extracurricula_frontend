@@ -33,7 +33,7 @@ export default {
   methods: {
     async submitOrder() {
       try {
-        const response = await fetch('http://localhost:4000/orders', {
+        const response = await fetch('http://35.177.209.72:4000/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
