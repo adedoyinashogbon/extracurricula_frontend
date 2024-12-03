@@ -40,7 +40,7 @@ export default {
     return {
       cart: [], // Stores items in the cart
       isCheckingOut: false, // Tracks whether the checkout page is visible
-      backendUrl: 'http://35.177.209.72:4000' // Hardcoded backend URL
+      backendUrl: 'https://35.177.209.72:4000' // Hardcoded backend URL
     };
   },
   methods: {
