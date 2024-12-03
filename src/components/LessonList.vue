@@ -59,7 +59,7 @@ export default {
         const data = await response.json();
         this.lessons = data.map((lesson) => ({
           ...lesson,
-          icon: `/icons/${lesson.icon}`, // Reference image from public/icons
+          icon: `/icons/${lesson.icon}`, // Reference images from public/icons
         }));
         this.filteredLessons = [...this.lessons];
       } catch (error) {
@@ -95,22 +95,16 @@ export default {
 </script>
 
 <style scoped>
-/* Container for the lesson list and controls */
-.lesson-list {
-  margin: 20px 0;
-}
-
 .lesson-controls {
   display: flex;
-  flex-wrap: wrap; /* Allow wrapping for small screens */
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px; /* Add spacing between controls */
-  margin-bottom: 20px; /* Add spacing below controls */
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .lesson-controls label {
-  font-weight: bold; /* Emphasize labels */
-  margin-right: 5px;
+  font-weight: bold;
 }
 
 .lesson-controls input,
@@ -119,33 +113,20 @@ export default {
   font-size: 0.9rem;
   border: 1px solid #ccc;
   border-radius: 4px;
-  transition: border-color 0.2s ease;
-}
-
-.lesson-controls input:focus,
-.lesson-controls select:focus {
-  border-color: #007bff; /* Highlight on focus */
-  outline: none; /* Remove default outline */
 }
 
 button {
   margin: 5px;
-  padding: 10px 15px; /* Increased padding for larger click area */
+  padding: 10px 15px;
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease; /* Smooth hover effects */
 }
 
 button:hover {
   background-color: #0056b3;
-  transform: scale(1.05); /* Slightly larger on hover */
-}
-
-button:active {
-  transform: scale(0.98); /* Slightly smaller on click */
 }
 </style>

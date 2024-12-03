@@ -20,8 +20,9 @@
     <!-- Show CheckoutForm if checking out -->
     <CheckoutForm 
       v-else 
+      :cartItems="cart"
       @order-placed="completeOrder" 
-      @cancel-checkout="cancelCheckout" 
+      @back-to-cart="cancelCheckout" 
     />
   </div>
 </template>
@@ -36,30 +37,25 @@ export default {
   data() {
     return {
       cart: [], // Stores items in the cart
-      isCheckingOut: false // Tracks whether the checkout page is visible
+      isCheckingOut: false, // Tracks whether the checkout page is visible
     };
   },
   methods: {
     addToCart(lesson) {
-      console.log('App.vue: Adding to cart:', lesson);
       this.cart.push(lesson);
     },
     removeFromCart(id) {
-      console.log('App.vue: Removing from cart item with id:', id);
       this.cart = this.cart.filter(item => item.id !== id);
     },
     showCheckoutPage() {
-      console.log('App.vue: Proceeding to checkout');
-      this.isCheckingOut = true; // Show only checkout page
+      this.isCheckingOut = true;
     },
-    completeOrder(orderDetails) {
-      console.log('App.vue: Order completed:', orderDetails);
+    completeOrder() {
       this.cart = []; // Clear the cart
       this.isCheckingOut = false; // Return to lesson list
     },
     cancelCheckout() {
-      console.log('App.vue: Returning to cart');
-      this.isCheckingOut = false; // Navigate back to cart
+      this.isCheckingOut = false;
     }
   }
 };
@@ -71,7 +67,6 @@ export default {
   padding: 20px;
   background-color: #4CAF50;
   color: white;
-  border-bottom: 2px solid #ddd;
 }
 
 .app-title {
@@ -81,26 +76,9 @@ export default {
 
 .extra {
   color: #ffffff;
-  text-shadow: 1px 1px 2px #333;
 }
 
 .curricula {
   color: #e97100;
-  text-shadow: 1px 1px 2px #4CAF50;
-}
-</style>
-
-<style scoped>
-.app-header {
-  text-align: center;
-  padding: 20px;
-  background-color: #4CAF50;
-  color: white;
-  border-bottom: 2px solid #ddd;
-}
-
-.app-title {
-  font-size: 2rem;
-  font-weight: bold;
 }
 </style>

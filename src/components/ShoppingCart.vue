@@ -19,7 +19,6 @@
   </div>
 </template>
 
-
 <script>
 import CheckoutForm from './CheckoutForm.vue';
 
@@ -33,22 +32,18 @@ export default {
   },
   methods: {
     removeFromCart(id) {
-      console.log('ShoppingCart.vue: Emitting remove-from-cart event for id:', id);
       this.$emit('remove-from-cart', id);
     },
     toggleCheckout() {
-      console.log('ShoppingCart.vue: Toggling checkout form');
       this.isCheckout = !this.isCheckout;
     },
     completeOrder() {
-      console.log('ShoppingCart.vue: Clearing cart after order completion');
       this.isCheckout = false;
-      this.$emit('clear-cart'); // Emit event to clear the cart in parent
+      this.$emit('clear-cart');
     },
   },
 };
 </script>
-
 
 
 <style scoped>
