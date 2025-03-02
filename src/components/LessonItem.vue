@@ -4,7 +4,7 @@
     <h3>{{ lesson.title }}</h3> 
     <p>Location: {{ lesson.location }}</p>
     <p>Price: ${{ lesson.price }}</p>
-    <p>Spaces: {{ currentSpaces }}</p> <!-- ✅ Uses computed property to track spaces -->
+    <p>Spaces: {{ currentSpaces }}</p> <!-- ✅ Tracks spaces dynamically -->
     <button @click="addToCart" :disabled="currentSpaces === 0">Add to Cart</button>
   </div>
 </template>
@@ -15,7 +15,7 @@ export default {
   data() {
     return {
       backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com", // ✅ Uses Vue CLI `.env`
-      currentSpaces: this.lesson.spaces, // ✅ Avoids directly mutating prop
+      currentSpaces: this.lesson.spaces, // ✅ Avoids direct prop mutation
     };
   },
   methods: {
@@ -29,13 +29,13 @@ export default {
           });
 
           if (response.ok) {
-            this.currentSpaces--; // ✅ Update locally for instant UI feedback
-            this.$emit('add-to-cart', this.lesson._id);
+            this.currentSpaces--; // ✅ Instantly update UI
+            this.$emit('add-to-cart', { ...this.lesson, spaces: this.currentSpaces }); // ✅ Pass updated lesson data
           } else {
-            console.error('Failed to add to cart');
+            console.error('❌ Failed to add to cart');
           }
         } catch (error) {
-          console.error('Error adding to cart:', error);
+          console.error('❌ Error adding to cart:', error);
         }
       }
     },

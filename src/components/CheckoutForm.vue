@@ -18,10 +18,9 @@
 
 <script>
 export default {
-  props: ['cartItems'],
+  props: ['cartItems', 'backendUrl'], // ✅ Receives backend URL from App.vue
   data() {
     return {
-      backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com", // ✅ Vue CLI `.env`
       name: '',
       phone: '',
     };
@@ -33,20 +32,25 @@ export default {
   },
   methods: {
     async submitOrder() {
+      if (this.cartItems.length === 0) {
+        alert('⚠️ Your cart is empty! Add items before placing an order.');
+        return;
+      }
+
       try {
-        const response = await fetch(`${this.backendUrl}/orders`, { // ✅ Uses Render Backend
+        const response = await fetch(`${this.backendUrl}/orders`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: this.name,
             phone: this.phone,
-            lessonIds: this.cartItems.map((item) => item._id), // ✅ Uses `_id`
+            lessonIds: this.cartItems.map(item => item._id), // ✅ Uses `_id`
           }),
         });
 
         if (response.ok) {
           alert('✅ Order placed successfully!');
-          this.$emit('order-placed'); // ✅ Emit event
+          this.$emit('order-placed'); // ✅ Emit event to clear cart in App.vue
         } else {
           console.error('❌ Order failed');
           alert('⚠️ Order failed. Try again.');

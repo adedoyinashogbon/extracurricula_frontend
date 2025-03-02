@@ -9,12 +9,15 @@
 
     <!-- Show LessonList and ShoppingCart if not checking out -->
     <div v-if="!isCheckingOut">
-      <LessonList :backendUrl="backendUrl" @add-to-cart="addToCart" />
+      <LessonList 
+        :backendUrl="backendUrl" 
+        @add-to-cart="addToCart" 
+      />
       <ShoppingCart 
         :cartItems="cart" 
         :backendUrl="backendUrl"
-        @remove-from-cart="removeFromCart" 
-        @proceed-checkout="showCheckoutPage" 
+        @remove-from-cart="removeFromCart"
+        @proceed-checkout="showCheckoutPage"
       />
     </div>
 
@@ -24,7 +27,7 @@
       :cartItems="cart"
       :backendUrl="backendUrl"
       @order-placed="completeOrder" 
-      @back-to-cart="cancelCheckout" 
+      @back-to-cart="cancelCheckout"
     />
   </div>
 </template>
@@ -38,54 +41,56 @@ export default {
   components: { LessonList, ShoppingCart, CheckoutForm },
   data() {
     return {
-      cart: [], // ✅ Reactive cart array
+      cart: [], // ✅ Cart is now reactive
       isCheckingOut: false, // ✅ Tracks checkout state
-      backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com"
+      backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com" 
     };
   },
   methods: {
     async addToCart(lesson) {
       console.log('App.vue: Adding to cart:', lesson);
 
+      const existingItem = this.cart.find(item => item._id === lesson._id);
+      if (existingItem) {
+        existingItem.quantity++;
+      } else {
+        this.cart.push({ ...lesson, quantity: 1 });
+      }
+
+      // ✅ Update spaces in backend
       try {
-        const response = await fetch(`${this.backendUrl}/lessons/${lesson._id}`, {
+        await fetch(`${this.backendUrl}/lessons/${lesson._id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ spaces: lesson.spaces - 1 }),
         });
-
-        if (response.ok) {
-          lesson.spaces -= 1; // ✅ Update local lesson space count
-          this.cart.push({ ...lesson }); // ✅ Ensures reactivity
-          this.cart = [...this.cart]; // ✅ Vue detects array changes
-        } else {
-          console.error('❌ Failed to update lesson spaces on the backend');
-        }
       } catch (error) {
-        console.error('❌ Error updating lesson:', error);
+        console.error('❌ Error updating lesson spaces:', error);
       }
     },
     async removeFromCart(_id) {
-      console.log('App.vue: Removing from cart:', _id);
+      console.log('App.vue: Removing from cart item with id:', _id);
+      const itemIndex = this.cart.findIndex(item => item._id === _id);
+      
+      if (itemIndex !== -1) {
+        const item = this.cart[itemIndex];
 
-      try {
-        const lessonToRemove = this.cart.find(item => item._id === _id);
-
-        if (lessonToRemove) {
-          const response = await fetch(`${this.backendUrl}/lessons/${_id}`, {
+        // ✅ Restore space in backend
+        try {
+          await fetch(`${this.backendUrl}/lessons/${_id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ spaces: lessonToRemove.spaces + 1 }), // ✅ Increase space back when removing
+            body: JSON.stringify({ spaces: item.spaces + 1 }),
           });
-
-          if (response.ok) {
-            this.cart = this.cart.filter(item => item._id !== _id);
-          } else {
-            console.error('❌ Failed to restore lesson space on the backend');
-          }
+        } catch (error) {
+          console.error('❌ Error restoring lesson spaces:', error);
         }
-      } catch (error) {
-        console.error('❌ Error removing item from cart:', error);
+
+        if (item.quantity > 1) {
+          item.quantity--;
+        } else {
+          this.cart.splice(itemIndex, 1);
+        }
       }
     },
     showCheckoutPage() {
@@ -94,7 +99,7 @@ export default {
     },
     completeOrder() {
       console.log('App.vue: Order completed');
-      this.cart = []; // ✅ Clear the cart after checkout
+      this.cart = [];
       this.isCheckingOut = false;
     },
     cancelCheckout() {

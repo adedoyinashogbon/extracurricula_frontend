@@ -44,7 +44,7 @@ export default {
     return {
       lessons: [],
       filteredLessons: [],
-      sortBy: 'title', 
+      sortBy: 'title',
       isAscending: true,
       searchQuery: '',
       backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com",
@@ -58,17 +58,17 @@ export default {
       try {
         const response = await fetch(`${this.backendUrl}/lessons`);
         const data = await response.json();
-        this.lessons = data; 
+        this.lessons = data.map(lesson => ({ ...lesson, quantity: 0 })); // ✅ Add quantity property for cart tracking
         this.filteredLessons = [...this.lessons];
       } catch (error) {
-        console.error('Error fetching lessons:', error);
+        console.error('❌ Error fetching lessons:', error);
       }
     },
     sortLessons() {
       const multiplier = this.isAscending ? 1 : -1;
       this.filteredLessons.sort((a, b) => {
         if (this.sortBy === 'title') return multiplier * a.title.localeCompare(b.title);
-        return multiplier * ((a[this.sortBy] || 0) - (b[this.sortBy] || 0)); 
+        return multiplier * ((a[this.sortBy] || 0) - (b[this.sortBy] || 0));
       });
     },
     toggleSortOrder() {
@@ -83,23 +83,22 @@ export default {
       this.sortLessons();
     },
     async addToCart(lesson) {
-      if (lesson.spaces > 0) { 
+      if (lesson.spaces > 0) {
+        lesson.spaces -= 1;
+        lesson.quantity += 1; // ✅ Track quantity in UI
+
+        // ✅ Update backend to decrease available spaces
         try {
-          const response = await fetch(`${this.backendUrl}/lessons/${lesson._id}`, {
+          await fetch(`${this.backendUrl}/lessons/${lesson._id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ spaces: lesson.spaces - 1 }),
+            body: JSON.stringify({ spaces: lesson.spaces }),
           });
-
-          if (response.ok) {
-            lesson.spaces -= 1; // ✅ Update lesson space locally
-            this.$emit('add-to-cart', { ...lesson }); // ✅ Ensure reactivity
-          } else {
-            console.error('❌ Failed to update lesson spaces on the backend');
-          }
         } catch (error) {
-          console.error('❌ Error updating lesson:', error);
+          console.error('❌ Error updating lesson spaces:', error);
         }
+
+        this.$emit('add-to-cart', lesson); // ✅ Pass full lesson object to cart
       }
     },
   },

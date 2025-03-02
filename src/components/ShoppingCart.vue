@@ -4,20 +4,21 @@
       <i class="fas fa-shopping-cart"></i> Shopping Cart
     </h2>
 
-    <ul v-if="cartItems.length">
-      <li v-for="item in cartItems" :key="item._id"> 
-        {{ item.title }} - ${{ item.price }}
-        <button @click="removeFromCart(item)">Remove</button> 
+    <ul v-if="cart.length">
+      <li v-for="item in cart" :key="item._id">
+        {{ item.title }} - ${{ item.price }} (x{{ item.quantity }})
+        <button @click="removeFromCart(item)">Remove</button>
       </li>
     </ul>
 
-    <p v-else class="empty-cart-message">Your cart is empty.</p> 
+    <p v-else class="empty-cart-message">Your cart is empty.</p>
 
-    <button :disabled="!cartItems.length" @click="toggleCheckout">Proceed to Checkout</button> 
+    <button :disabled="!cart.length" @click="toggleCheckout">Proceed to Checkout</button>
 
     <CheckoutForm
       v-if="isCheckout"
-      :cartItems="cartItems"
+      :cartItems="cart"
+      :backendUrl="backendUrl"
       @order-placed="completeOrder"
       @back-to-cart="isCheckout = false"
     />
@@ -29,24 +30,44 @@ import CheckoutForm from './CheckoutForm.vue';
 
 export default {
   components: { CheckoutForm },
-  props: ['cartItems'],
+  props: ['cartItems', 'backendUrl'], // ✅ Receives backend URL from App.vue
   data() {
     return {
-      backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com", // ✅ Uses Vue CLI `.env`
+      cart: [...this.cartItems], // ✅ Copy cartItems to local state
       isCheckout: false,
     };
+  },
+  watch: {
+    // ✅ Ensure cart updates when cartItems change in App.vue
+    cartItems: {
+      handler(newCart) {
+        this.cart = [...newCart];
+      },
+      deep: true,
+    },
   },
   methods: {
     async removeFromCart(item) {
       try {
+        // ✅ Restore spaces in backend
         const response = await fetch(`${this.backendUrl}/lessons/${item._id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ spaces: item.spaces + 1 }), // ✅ Increase space by 1 when removing
+          body: JSON.stringify({ spaces: item.spaces + 1 }),
         });
 
         if (response.ok) {
-          this.$emit('remove-from-cart', item._id);
+          // ✅ Update cart UI
+          const index = this.cart.findIndex(cartItem => cartItem._id === item._id);
+          if (index !== -1) {
+            if (this.cart[index].quantity > 1) {
+              this.cart[index].quantity--;
+            } else {
+              this.cart.splice(index, 1);
+            }
+          }
+
+          this.$emit('remove-from-cart', item); // ✅ Emit full item to update parent
         } else {
           console.error('❌ Failed to remove item from cart');
         }
@@ -59,7 +80,8 @@ export default {
     },
     completeOrder() {
       this.isCheckout = false;
-      this.$emit('clear-cart');
+      this.cart = [];
+      this.$emit('clear-cart'); // ✅ Notify App.vue to reset cart
     },
   },
 };
