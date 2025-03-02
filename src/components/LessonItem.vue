@@ -1,8 +1,8 @@
 <template>
   <div class="lesson-item">
-    <!-- ✅ Fix: Correct the image URL -->
+    <!-- ✅ Fix: Ensure the image path is correct -->
     <img 
-      :src="getImageUrl(lesson.icon)" 
+      :src="computedImageUrl" 
       :alt="lesson.title" 
       class="lesson-icon"
     />
@@ -21,20 +21,23 @@
 <script>
 export default {
   props: ["lesson"],
+  computed: {
+    /**
+     * ✅ Fix: Compute the correct image path
+     * - Removes duplicate `/icons/icons/`
+     * - Uses a fallback if the image is missing
+     */
+    computedImageUrl() {
+      if (!this.lesson.icon) return "/icons/default-icon.png"; // ✅ Default image fallback
+
+      return this.lesson.icon.startsWith("/icons/") 
+        ? this.lesson.icon 
+        : `/icons/${this.lesson.icon.replace(/^\/+/, "")}`;
+    }
+  },
   methods: {
     /**
-     * ✅ Fix: Ensure the correct image URL
-     * This function ensures no duplicate `/icons/` in the path.
-     */
-    getImageUrl(icon) {
-      if (!icon) return "/icons/default-icon.png"; // ✅ Fallback for missing images
-
-      // ✅ Ensure correct path format (fixes duplicate `/icons/icons/` issue)
-      return icon.startsWith("/icons/") ? icon : `/icons/${icon.replace(/^\/+/, "")}`;
-    },
-
-    /**
-     * ✅ Handles adding item to cart
+     * ✅ Handles adding an item to the cart
      */
     addToCart() {
       if (this.lesson.spaces > 0) {
