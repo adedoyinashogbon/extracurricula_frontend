@@ -7,118 +7,93 @@
       </h1>
     </header>
 
-    <!-- Show LessonList and ShoppingCart if not checking out -->
     <div v-if="!isCheckingOut">
-      <LessonList 
-        :backendUrl="backendUrl" 
-        @add-to-cart="addToCart" 
-      />
-      <ShoppingCart 
-        :cartItems="cart" 
+      <LessonList :backendUrl="backendUrl" @add-to-cart="addToCart" />
+      <ShoppingCart
+        :cartItems="cart"
         :backendUrl="backendUrl"
         @remove-from-cart="removeFromCart"
         @proceed-checkout="showCheckoutPage"
       />
     </div>
 
-    <!-- Show CheckoutForm if checking out -->
-    <CheckoutForm 
-      v-else 
+    <CheckoutForm
+      v-else
       :cartItems="cart"
       :backendUrl="backendUrl"
-      @order-placed="completeOrder" 
+      @order-placed="completeOrder"
       @back-to-cart="cancelCheckout"
     />
   </div>
 </template>
 
 <script>
-import LessonList from './components/LessonList.vue';
-import ShoppingCart from './components/ShoppingCart.vue';
-import CheckoutForm from './components/CheckoutForm.vue';
+import LessonList from "./components/LessonList.vue";
+import ShoppingCart from "./components/ShoppingCart.vue";
+import CheckoutForm from "./components/CheckoutForm.vue";
 
 export default {
   components: { LessonList, ShoppingCart, CheckoutForm },
   data() {
     return {
-      cart: [], // ✅ Cart is now reactive
-      isCheckingOut: false, // ✅ Tracks checkout state
-      backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com" 
+      cart: [],
+      isCheckingOut: false,
+      backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com",
     };
   },
   methods: {
     async addToCart(lesson) {
-      console.log('App.vue: Adding to cart:', lesson);
+      if (lesson.spaces <= 0) return;
 
-      const existingItem = this.cart.find(item => item._id === lesson._id);
-      if (existingItem) {
-        existingItem.quantity++;
+      let cartItem = this.cart.find((item) => item._id === lesson._id);
+      if (cartItem) {
+        cartItem.quantity++;
       } else {
         this.cart.push({ ...lesson, quantity: 1 });
       }
 
-      // ✅ Update spaces in backend and ensure latest data
       try {
-        const response = await fetch(`${this.backendUrl}/lessons/${lesson._id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ spaces: Math.max(0, lesson.spaces - 1) }), // ✅ Prevent negative spaces
+        await fetch(`${this.backendUrl}/lessons/${lesson._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ spaces: lesson.spaces - 1 }),
         });
 
-        if (response.ok) {
-          lesson.spaces = Math.max(0, lesson.spaces - 1); // ✅ Ensure frontend consistency
-          this.cart = [...this.cart]; // ✅ Force Vue reactivity update
-        } else {
-          console.error('❌ Failed to update spaces in backend');
-        }
+        lesson.spaces--;
       } catch (error) {
-        console.error('❌ Error updating lesson spaces:', error);
+        console.error("❌ Error updating backend spaces:", error);
       }
     },
 
     async removeFromCart(_id) {
-      console.log('App.vue: Removing from cart item with id:', _id);
-      const itemIndex = this.cart.findIndex(item => item._id === _id);
+      const itemIndex = this.cart.findIndex((item) => item._id === _id);
+      if (itemIndex === -1) return;
 
-      if (itemIndex !== -1) {
-        const item = this.cart[itemIndex];
+      const item = this.cart[itemIndex];
 
-        // ✅ Ensure spaces are correctly updated
-        try {
-          const response = await fetch(`${this.backendUrl}/lessons/${_id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ spaces: item.spaces + 1 }), // ✅ Corrected spaces update
-          });
+      try {
+        await fetch(`${this.backendUrl}/lessons/${_id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ spaces: Math.min(5, item.spaces + item.quantity) }),
+        });
 
-          if (response.ok) {
-            item.spaces++; // ✅ Restore space count correctly
-            if (item.quantity > 1) {
-              item.quantity--;
-            } else {
-              this.cart.splice(itemIndex, 1);
-            }
-            this.cart = [...this.cart]; // ✅ Ensure Vue updates UI
-          } else {
-            console.error('❌ Failed to update spaces in backend');
-          }
-        } catch (error) {
-          console.error('❌ Error restoring lesson spaces:', error);
-        }
+        this.cart.splice(itemIndex, 1);
+      } catch (error) {
+        console.error("❌ Error restoring spaces:", error);
       }
     },
 
     showCheckoutPage() {
-      console.log('App.vue: Proceeding to checkout');
       this.isCheckingOut = true;
     },
+
     completeOrder() {
-      console.log('App.vue: Order completed');
       this.cart = [];
       this.isCheckingOut = false;
     },
+
     cancelCheckout() {
-      console.log('App.vue: Returning to cart');
       this.isCheckingOut = false;
     }
   }

@@ -6,108 +6,69 @@
     <div class="lesson-controls">
       <label for="sort">Sort By:</label>
       <select id="sort" v-model="sortBy" @change="sortLessons">
-        <option value="title">Title</option> 
+        <option value="title">Title</option>
         <option value="price">Price</option>
-        <option value="spaces">Available Spaces</option> 
+        <option value="spaces">Available Spaces</option>
       </select>
       <button @click="toggleSortOrder">
         <i :class="isAscending ? 'fas fa-sort-amount-up' : 'fas fa-sort-amount-down'"></i>
-        {{ isAscending ? 'Ascending' : 'Descending' }}
+        {{ isAscending ? "Ascending" : "Descending" }}
       </button>
     </div>
 
-    <!-- Search Bar -->
-    <div class="lesson-controls">
-      <label for="search">Search Lessons:</label>
-      <input
-        id="search"
-        type="text"
-        v-model="searchQuery"
-        placeholder="Search by title or location" 
-        @input="filterLessons"
-      />
-    </div>
-
-    <!-- Lesson Items -->
-    <div v-for="lesson in filteredLessons" :key="lesson._id">
+    <!-- Sorted Lesson Items -->
+    <div v-for="lesson in sortedLessons" :key="lesson._id">
       <LessonItem :lesson="lesson" @add-to-cart="addToCart" />
     </div>
   </div>
 </template>
 
 <script>
-import LessonItem from './LessonItem.vue';
+import LessonItem from "./LessonItem.vue";
 
 export default {
   components: { LessonItem },
   data() {
     return {
       lessons: [],
-      filteredLessons: [],
-      sortBy: 'title',
+      sortBy: "title",
       isAscending: true,
-      searchQuery: '',
       backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com",
     };
   },
   created() {
     this.fetchLessons();
   },
+  computed: {
+    sortedLessons() {
+      return [...this.lessons].sort((a, b) => {
+        const multiplier = this.isAscending ? 1 : -1;
+
+        if (this.sortBy === "title") {
+          return multiplier * a.title.localeCompare(b.title);
+        }
+        return multiplier * (a[this.sortBy] - b[this.sortBy]);
+      });
+    },
+  },
   methods: {
     async fetchLessons() {
       try {
         const response = await fetch(`${this.backendUrl}/lessons`);
-        const data = await response.json();
-        
-        // ✅ Ensure `quantity` is tracked properly
-        this.lessons = data.map(lesson => ({
-          ...lesson,
-          quantity: 0, // ✅ Start with zero items in cart
-        }));
-        this.filteredLessons = [...this.lessons];
+        this.lessons = await response.json();
       } catch (error) {
-        console.error('❌ Error fetching lessons:', error);
+        console.error("❌ Error fetching lessons:", error);
       }
     },
     sortLessons() {
-      const multiplier = this.isAscending ? 1 : -1;
-      this.filteredLessons.sort((a, b) => {
-        if (this.sortBy === 'title') return multiplier * a.title.localeCompare(b.title);
-        return multiplier * ((a[this.sortBy] || 0) - (b[this.sortBy] || 0));
-      });
+      this.isAscending = true; // ✅ Reset sorting to ascending when changing criteria
     },
     toggleSortOrder() {
-      this.isAscending = !this.isAscending;
-      this.sortLessons();
+      this.isAscending = !this.isAscending; // ✅ Properly toggles sorting order
     },
-    filterLessons() {
-      const query = this.searchQuery.toLowerCase();
-      this.filteredLessons = this.lessons.filter((lesson) =>
-        lesson.title.toLowerCase().includes(query) || lesson.location.toLowerCase().includes(query)
-      );
-      this.sortLessons();
-    },
-    async addToCart(lesson) {
+    addToCart(lesson) {
       if (lesson.spaces > 0) {
-        lesson.spaces -= 1;
-        lesson.quantity += 1; // ✅ Track quantity in UI
-
-        // ✅ Update backend to decrease available spaces
-        try {
-          const response = await fetch(`${this.backendUrl}/lessons/${lesson._id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ spaces: lesson.spaces }),
-          });
-
-          if (response.ok) {
-            this.$emit('add-to-cart', { ...lesson }); // ✅ Pass updated lesson with quantity
-          } else {
-            console.error('❌ Failed to update lesson spaces in backend');
-          }
-        } catch (error) {
-          console.error('❌ Error updating lesson spaces:', error);
-        }
+        this.$emit("add-to-cart", lesson);
       }
     },
   },
@@ -117,7 +78,6 @@ export default {
 <style scoped>
 .lesson-controls {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   margin-bottom: 20px;
@@ -127,22 +87,18 @@ export default {
   font-weight: bold;
 }
 
-.lesson-controls input,
 .lesson-controls select {
   padding: 8px;
-  font-size: 0.9rem;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
 button {
-  margin: 5px;
-  padding: 10px 15px;
+  padding: 10px;
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
-  font-size: 0.9rem;
   cursor: pointer;
 }
 

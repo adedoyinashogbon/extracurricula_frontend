@@ -1,52 +1,47 @@
 <template>
   <div class="lesson-item">
-    <img :src="lesson.icon || 'default-icon.png'" alt="Lesson Icon" />
-    <h3>{{ lesson.title }}</h3> 
+    <!-- ✅ Fix: Correct the image URL -->
+    <img 
+      :src="getImageUrl(lesson.icon)" 
+      :alt="lesson.title" 
+      class="lesson-icon"
+    />
+
+    <h3>{{ lesson.title }}</h3>
     <p>Location: {{ lesson.location }}</p>
     <p>Price: ${{ lesson.price }}</p>
-    <p>Spaces: {{ currentSpaces }}</p> <!-- ✅ Tracks spaces dynamically -->
-    <button @click="addToCart" :disabled="currentSpaces === 0">Add to Cart</button>
+    <p>Spaces: {{ lesson.spaces }}</p>
+
+    <button @click="addToCart" :disabled="lesson.spaces === 0">
+      {{ lesson.spaces === 0 ? "Sold Out" : "Add to Cart" }}
+    </button>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['lesson'],
-  data() {
-    return {
-      backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com", // ✅ Uses Vue CLI `.env`
-      currentSpaces: this.lesson.spaces, // ✅ Avoids direct prop mutation
-    };
-  },
+  props: ["lesson"],
   methods: {
-    async addToCart() {
-      if (this.currentSpaces > 0) {
-        try {
-          const response = await fetch(`${this.backendUrl}/lessons/${this.lesson._id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ spaces: this.currentSpaces - 1 }),
-          });
+    /**
+     * ✅ Fix: Ensure the correct image URL
+     * This function ensures no duplicate `/icons/` in the path.
+     */
+    getImageUrl(icon) {
+      if (!icon) return "/icons/default-icon.png"; // ✅ Fallback for missing images
 
-          if (response.ok) {
-            this.currentSpaces--; // ✅ Instantly update UI
-            
-            // ✅ Ensure correct quantity tracking
-            this.$emit('add-to-cart', { 
-              ...this.lesson, 
-              spaces: this.currentSpaces, 
-              quantity: 1 
-            });
-
-          } else {
-            console.error('❌ Failed to update lesson spaces in backend');
-          }
-        } catch (error) {
-          console.error('❌ Error adding to cart:', error);
-        }
-      }
+      // ✅ Ensure correct path format (fixes duplicate `/icons/icons/` issue)
+      return icon.startsWith("/icons/") ? icon : `/icons/${icon.replace(/^\/+/, "")}`;
     },
-  },
+
+    /**
+     * ✅ Handles adding item to cart
+     */
+    addToCart() {
+      if (this.lesson.spaces > 0) {
+        this.$emit("add-to-cart", this.lesson);
+      }
+    }
+  }
 };
 </script>
 
@@ -57,6 +52,16 @@ export default {
   margin: 15px 0;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  background: white;
+}
+
+/* ✅ Style for images */
+.lesson-icon {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 10px;
 }
 
 .lesson-item h3 {
@@ -81,12 +86,5 @@ export default {
 .lesson-item button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
-}
-
-.lesson-item img {
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-  margin-bottom: 10px;
 }
 </style>
