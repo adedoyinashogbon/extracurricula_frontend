@@ -58,7 +58,12 @@ export default {
       try {
         const response = await fetch(`${this.backendUrl}/lessons`);
         const data = await response.json();
-        this.lessons = data.map(lesson => ({ ...lesson, quantity: 0 })); // ✅ Add quantity property for cart tracking
+        
+        // ✅ Ensure `quantity` is tracked properly
+        this.lessons = data.map(lesson => ({
+          ...lesson,
+          quantity: 0, // ✅ Start with zero items in cart
+        }));
         this.filteredLessons = [...this.lessons];
       } catch (error) {
         console.error('❌ Error fetching lessons:', error);
@@ -89,16 +94,20 @@ export default {
 
         // ✅ Update backend to decrease available spaces
         try {
-          await fetch(`${this.backendUrl}/lessons/${lesson._id}`, {
+          const response = await fetch(`${this.backendUrl}/lessons/${lesson._id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ spaces: lesson.spaces }),
           });
+
+          if (response.ok) {
+            this.$emit('add-to-cart', { ...lesson }); // ✅ Pass updated lesson with quantity
+          } else {
+            console.error('❌ Failed to update lesson spaces in backend');
+          }
         } catch (error) {
           console.error('❌ Error updating lesson spaces:', error);
         }
-
-        this.$emit('add-to-cart', lesson); // ✅ Pass full lesson object to cart
       }
     },
   },

@@ -18,7 +18,7 @@
 
 <script>
 export default {
-  props: ['cartItems', 'backendUrl'], // ✅ Receives backend URL from App.vue
+  props: ['cartItems', 'backendUrl'], // ✅ Ensures backend URL is passed from App.vue
   data() {
     return {
       name: '',
@@ -53,11 +53,11 @@ export default {
           this.$emit('order-placed'); // ✅ Emit event to clear cart in App.vue
         } else {
           console.error('❌ Order failed');
-          alert('⚠️ Order failed. Try again.');
+          alert('⚠️ Order failed. Please try again.');
         }
       } catch (error) {
         console.error('❌ Error submitting order:', error);
-        alert('⚠️ An error occurred.');
+        alert('⚠️ An error occurred while processing your order.');
       }
     },
   },

@@ -30,7 +30,7 @@ import CheckoutForm from './CheckoutForm.vue';
 
 export default {
   components: { CheckoutForm },
-  props: ['cartItems', 'backendUrl'], // ✅ Receives backend URL from App.vue
+  props: ['cartItems', 'backendUrl'],
   data() {
     return {
       cart: [...this.cartItems], // ✅ Copy cartItems to local state
@@ -38,7 +38,7 @@ export default {
     };
   },
   watch: {
-    // ✅ Ensure cart updates when cartItems change in App.vue
+    // ✅ Keep cart in sync with parent component (App.vue)
     cartItems: {
       handler(newCart) {
         this.cart = [...newCart];
@@ -48,28 +48,31 @@ export default {
   },
   methods: {
     async removeFromCart(item) {
+      console.log("🔍 Removing item:", item);
+
+      if (!item._id) {
+        console.error("❌ Error: Item has no valid _id");
+        return;
+      }
+
       try {
-        // ✅ Restore spaces in backend
+        // ✅ Restore original spaces
+        const updatedSpaces = item.spaces + item.quantity;
+
         const response = await fetch(`${this.backendUrl}/lessons/${item._id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ spaces: item.spaces + 1 }),
+          body: JSON.stringify({ spaces: updatedSpaces }),
         });
 
         if (response.ok) {
-          // ✅ Update cart UI
-          const index = this.cart.findIndex(cartItem => cartItem._id === item._id);
-          if (index !== -1) {
-            if (this.cart[index].quantity > 1) {
-              this.cart[index].quantity--;
-            } else {
-              this.cart.splice(index, 1);
-            }
-          }
-
-          this.$emit('remove-from-cart', item); // ✅ Emit full item to update parent
+          // ✅ Update cart state properly
+          this.cart = this.cart.filter(cartItem => cartItem._id !== item._id);
+          
+          // ✅ Emit updated cart to parent component (App.vue)
+          this.$emit('remove-from-cart', this.cart);
         } else {
-          console.error('❌ Failed to remove item from cart');
+          console.error('❌ Failed to remove item from cart (Backend Error)');
         }
       } catch (error) {
         console.error('❌ Error removing item from cart:', error);
@@ -81,7 +84,7 @@ export default {
     completeOrder() {
       this.isCheckout = false;
       this.cart = [];
-      this.$emit('clear-cart'); // ✅ Notify App.vue to reset cart
+      this.$emit('clear-cart'); // ✅ Reset cart after checkout
     },
   },
 };

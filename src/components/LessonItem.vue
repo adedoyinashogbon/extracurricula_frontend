@@ -30,9 +30,16 @@ export default {
 
           if (response.ok) {
             this.currentSpaces--; // ✅ Instantly update UI
-            this.$emit('add-to-cart', { ...this.lesson, spaces: this.currentSpaces }); // ✅ Pass updated lesson data
+            
+            // ✅ Ensure correct quantity tracking
+            this.$emit('add-to-cart', { 
+              ...this.lesson, 
+              spaces: this.currentSpaces, 
+              quantity: 1 
+            });
+
           } else {
-            console.error('❌ Failed to add to cart');
+            console.error('❌ Failed to update lesson spaces in backend');
           }
         } catch (error) {
           console.error('❌ Error adding to cart:', error);
