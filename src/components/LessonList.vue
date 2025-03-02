@@ -2,11 +2,24 @@
   <div>
     <h2>Available Lessons</h2>
 
-    <!-- Sorting Options -->
+    <!-- 🔍 Search Bar -->
+    <div class="lesson-controls">
+      <label for="search">Search Lessons:</label>
+      <input
+        id="search"
+        type="text"
+        v-model="searchQuery"
+        placeholder="Search by title, location, price, or availability"
+        @input="filterLessons"
+      />
+    </div>
+
+    <!-- 🔽 Sorting Options -->
     <div class="lesson-controls">
       <label for="sort">Sort By:</label>
       <select id="sort" v-model="sortBy" @change="sortLessons">
         <option value="title">Title</option>
+        <option value="location">Location</option>
         <option value="price">Price</option>
         <option value="spaces">Available Spaces</option>
       </select>
@@ -16,7 +29,7 @@
       </button>
     </div>
 
-    <!-- Sorted Lesson Items -->
+    <!-- 📝 Filtered & Sorted Lesson Items -->
     <div v-for="lesson in sortedLessons" :key="lesson._id">
       <LessonItem :lesson="lesson" @add-to-cart="addToCart" />
     </div>
@@ -31,8 +44,10 @@ export default {
   data() {
     return {
       lessons: [],
+      filteredLessons: [],
       sortBy: "title",
       isAscending: true,
+      searchQuery: "",
       backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com",
     };
   },
@@ -41,13 +56,13 @@ export default {
   },
   computed: {
     sortedLessons() {
-      return [...this.lessons].sort((a, b) => {
+      return [...this.filteredLessons].sort((a, b) => {
         const multiplier = this.isAscending ? 1 : -1;
 
-        if (this.sortBy === "title") {
-          return multiplier * a.title.localeCompare(b.title);
+        if (this.sortBy === "title" || this.sortBy === "location") {
+          return multiplier * a[this.sortBy].localeCompare(b[this.sortBy]); // Sort alphabetically
         }
-        return multiplier * (a[this.sortBy] - b[this.sortBy]);
+        return multiplier * (a[this.sortBy] - b[this.sortBy]); // Sort numerically
       });
     },
   },
@@ -55,16 +70,28 @@ export default {
     async fetchLessons() {
       try {
         const response = await fetch(`${this.backendUrl}/lessons`);
-        this.lessons = await response.json();
+        const data = await response.json();
+        this.lessons = data;
+        this.filteredLessons = data; // Initialize filtered list
       } catch (error) {
         console.error("❌ Error fetching lessons:", error);
       }
     },
+    filterLessons() {
+      const query = this.searchQuery.toLowerCase();
+
+      this.filteredLessons = this.lessons.filter((lesson) =>
+        lesson.title.toLowerCase().includes(query) ||
+        lesson.location.toLowerCase().includes(query) ||
+        String(lesson.price).includes(query) ||
+        String(lesson.spaces).includes(query)
+      );
+    },
     sortLessons() {
-      this.isAscending = true; // ✅ Reset sorting to ascending when changing criteria
+      this.isAscending = true; // Reset sorting to ascending when changing criteria
     },
     toggleSortOrder() {
-      this.isAscending = !this.isAscending; // ✅ Properly toggles sorting order
+      this.isAscending = !this.isAscending; // Properly toggles sorting order
     },
     addToCart(lesson) {
       if (lesson.spaces > 0) {
@@ -78,6 +105,7 @@ export default {
 <style scoped>
 .lesson-controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   margin-bottom: 20px;
@@ -87,6 +115,7 @@ export default {
   font-weight: bold;
 }
 
+.lesson-controls input,
 .lesson-controls select {
   padding: 8px;
   border: 1px solid #ccc;
