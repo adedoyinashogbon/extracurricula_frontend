@@ -40,7 +40,7 @@ export default {
     return {
       cart: [], // Stores items in the cart
       isCheckingOut: false, // Tracks whether the checkout page is visible
-      backendUrl: 'https://35.177.209.72:4000' // Hardcoded backend URL
+      backendUrl: import.meta.env.VITE_BACKEND_URL // ✅ Use environment variable
     };
   },
   methods: {
@@ -48,22 +48,22 @@ export default {
       console.log('App.vue: Adding to cart:', lesson);
       this.cart.push(lesson);
     },
-    removeFromCart(id) {
-      console.log('App.vue: Removing from cart item with id:', id);
-      this.cart = this.cart.filter(item => item.id !== id);
+    removeFromCart(_id) {
+      console.log('App.vue: Removing from cart item with id:', _id);
+      this.cart = this.cart.filter(item => item._id !== _id); // ✅ Use `_id`
     },
     showCheckoutPage() {
       console.log('App.vue: Proceeding to checkout');
-      this.isCheckingOut = true; // Show only checkout page
+      this.isCheckingOut = true;
     },
     completeOrder() {
       console.log('App.vue: Order completed');
       this.cart = []; // Clear the cart
-      this.isCheckingOut = false; // Return to lesson list
+      this.isCheckingOut = false;
     },
     cancelCheckout() {
       console.log('App.vue: Returning to cart');
-      this.isCheckingOut = false; // Navigate back to cart
+      this.isCheckingOut = false;
     }
   }
 };

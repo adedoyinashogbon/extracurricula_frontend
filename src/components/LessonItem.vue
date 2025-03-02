@@ -1,11 +1,11 @@
 <template>
   <div class="lesson-item">
-    <img :src="lesson.icon" alt="Lesson Icon" />
-    <h3>{{ lesson.title }}</h3>
+    <img :src="lesson.icon || 'default-icon.png'" alt="Lesson Icon" />
+    <h3>{{ lesson.title }}</h3> <!-- ✅ Changed from topic to title -->
     <p>Location: {{ lesson.location }}</p>
     <p>Price: ${{ lesson.price }}</p>
-    <p>Spaces: {{ lesson.spaces }}</p>
-    <button @click="addToCart" :disabled="lesson.spaces === 0">Add to Cart</button>
+    <p>Spaces: {{ lesson.spaces }}</p> <!-- ✅ Changed from space to spaces -->
+    <button @click="addToCart" :disabled="lesson.spaces === 0">Add to Cart</button> <!-- ✅ Changed from space -->
   </div>
 </template>
 
@@ -14,7 +14,7 @@ export default {
   props: ['lesson'],
   methods: {
     addToCart() {
-      this.$emit('add-to-cart', this.lesson);
+      this.$emit('add-to-cart', this.lesson._id); 
     },
   },
 };
@@ -40,5 +40,12 @@ export default {
   padding: 8px 12px;
   border: none;
   border-radius: 4px;
+}
+
+.lesson-item img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  margin-bottom: 10px;
 }
 </style>

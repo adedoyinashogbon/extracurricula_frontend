@@ -18,7 +18,7 @@
 
 <script>
 export default {
-  props: ['cartItems'],
+  props: ['cartItems', 'backendUrl'], // ✅ Backend URL as prop
   data() {
     return {
       name: '',
@@ -27,24 +27,25 @@ export default {
   },
   computed: {
     isFormValid() {
-      return /^[a-zA-Z\s]+$/.test(this.name) && /^[0-9]+$/.test(this.phone);
+      return /^[a-zA-Z\s]+$/.test(this.name) && /^[0-9]{10,15}$/.test(this.phone); // ✅ Improved validation
     },
   },
   methods: {
     async submitOrder() {
       try {
-        const response = await fetch('https://35.177.209.72:4000/orders', {
+        const response = await fetch(`${this.backendUrl}/orders`, { // ✅ Use backend URL
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: this.name,
             phone: this.phone,
-            lessonIds: this.cartItems.map((item) => item.id),
+            lessonIds: this.cartItems.map((item) => item._id), // ✅ Use `_id` instead of `id`
           }),
         });
+
         if (response.ok) {
           alert('Order placed successfully!');
-          window.location.reload(); // Reset the app
+          this.$emit('order-placed'); // ✅ Emit order placed event
         } else {
           console.error('Order failed');
           alert('Order failed. Try again.');

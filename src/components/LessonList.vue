@@ -6,9 +6,9 @@
     <div class="lesson-controls">
       <label for="sort">Sort By:</label>
       <select id="sort" v-model="sortBy" @change="sortLessons">
-        <option value="title">Title</option>
+        <option value="title">Title</option> <!-- ✅ Changed from topic to title -->
         <option value="price">Price</option>
-        <option value="spaces">Spaces</option>
+        <option value="spaces">Spaces</option> <!-- ✅ Changed from space to spaces -->
       </select>
       <button @click="toggleSortOrder">
         <i :class="isAscending ? 'fas fa-sort-amount-up' : 'fas fa-sort-amount-down'"></i>
@@ -23,13 +23,13 @@
         id="search"
         type="text"
         v-model="searchQuery"
-        placeholder="Search by title or location"
+        placeholder="Search by title or location" <!-- ✅ Changed from topic -->
         @input="filterLessons"
       />
     </div>
 
     <!-- Lesson Items -->
-    <div v-for="lesson in filteredLessons" :key="lesson.id">
+    <div v-for="lesson in filteredLessons" :key="lesson._id"> 
       <LessonItem :lesson="lesson" @add-to-cart="addToCart" />
     </div>
   </div>
@@ -40,11 +40,12 @@ import LessonItem from './LessonItem.vue';
 
 export default {
   components: { LessonItem },
+  props: ['backendUrl'],
   data() {
     return {
-      lessons: [], // Fetched from backend
+      lessons: [],
       filteredLessons: [],
-      sortBy: 'title',
+      sortBy: 'title', // ✅ Changed from topic to title
       isAscending: true,
       searchQuery: '',
     };
@@ -54,24 +55,23 @@ export default {
   },
   methods: {
     async fetchLessons() {
-  try {
-    const response = await fetch('https://35.177.209.72:4000/lessons'); // Backend URL
-    const data = await response.json();
-    this.lessons = data.map((lesson) => ({
-      ...lesson,
-      icon: `/icons/${lesson.icon}`,
-    }));
-    this.filteredLessons = [...this.lessons];
-  } catch (error) {
-    console.error('Error fetching lessons:', error);
-  }
-}
-,
+      try {
+        const response = await fetch(`${this.backendUrl}/lessons`);
+        const data = await response.json();
+        this.lessons = data.map((lesson) => ({
+          ...lesson,
+          icon: `/icons/${lesson.icon}`,
+        }));
+        this.filteredLessons = [...this.lessons];
+      } catch (error) {
+        console.error('Error fetching lessons:', error);
+      }
+    },
     sortLessons() {
       const multiplier = this.isAscending ? 1 : -1;
       this.filteredLessons.sort((a, b) => {
-        if (this.sortBy === 'title') return multiplier * a.title.localeCompare(b.title);
-        return multiplier * (a[this.sortBy] - b[this.sortBy]);
+        if (this.sortBy === 'title') return multiplier * a.title.localeCompare(b.title); // ✅ Changed from topic
+        return multiplier * ((a[this.sortBy] || 0) - (b[this.sortBy] || 0)); 
       });
     },
     toggleSortOrder() {
@@ -81,14 +81,14 @@ export default {
     filterLessons() {
       const query = this.searchQuery.toLowerCase();
       this.filteredLessons = this.lessons.filter((lesson) =>
-        lesson.title.toLowerCase().includes(query) || lesson.location.toLowerCase().includes(query)
+        lesson.title.toLowerCase().includes(query) || lesson.location.toLowerCase().includes(query) // ✅ Changed from topic
       );
       this.sortLessons();
     },
     addToCart(lesson) {
-      if (lesson.spaces > 0) {
-        lesson.spaces -= 1; // Reduce spaces
-        this.$emit('add-to-cart', lesson);
+      if (lesson.spaces > 0) { // ✅ Changed from space to spaces
+        lesson.spaces -= 1; 
+        this.$emit('add-to-cart', lesson._id);
       }
     },
   },
