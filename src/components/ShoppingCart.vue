@@ -6,7 +6,7 @@
 
     <ul v-if="cartItems.length">
       <li v-for="item in cartItems" :key="item._id"> 
-        {{ item.title }} - ${{ item.price }} <!-- ✅ Changed from topic to title -->
+        {{ item.title }} - ${{ item.price }} <!-- ✅ Uses title instead of topic -->
         <button @click="removeFromCart(item._id)">Remove</button> 
       </li>
     </ul>
@@ -36,8 +36,23 @@ export default {
     };
   },
   methods: {
-    removeFromCart(_id) {
-      this.$emit('remove-from-cart', _id);
+    async removeFromCart(_id) {
+      try {
+        // ✅ Make API call to update backend
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/lessons/${_id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ spaces: 1 }), // ✅ Increase space by 1 when removing
+        });
+
+        if (response.ok) {
+          this.$emit('remove-from-cart', _id);
+        } else {
+          console.error('Failed to remove item from cart');
+        }
+      } catch (error) {
+        console.error('Error removing item from cart:', error);
+      }
     },
     toggleCheckout() {
       this.isCheckout = !this.isCheckout;

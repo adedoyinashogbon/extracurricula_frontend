@@ -1,11 +1,11 @@
 <template>
   <div class="lesson-item">
     <img :src="lesson.icon || 'default-icon.png'" alt="Lesson Icon" />
-    <h3>{{ lesson.title }}</h3> <!-- ✅ Changed from topic to title -->
+    <h3>{{ lesson.title }}</h3> <!-- ✅ Uses title instead of topic -->
     <p>Location: {{ lesson.location }}</p>
     <p>Price: ${{ lesson.price }}</p>
-    <p>Spaces: {{ lesson.spaces }}</p> <!-- ✅ Changed from space to spaces -->
-    <button @click="addToCart" :disabled="lesson.spaces === 0">Add to Cart</button> <!-- ✅ Changed from space -->
+    <p>Spaces: {{ lesson.spaces }}</p> <!-- ✅ Uses spaces instead of space -->
+    <button @click="addToCart" :disabled="lesson.spaces === 0">Add to Cart</button> <!-- ✅ Uses spaces -->
   </div>
 </template>
 
@@ -13,8 +13,25 @@
 export default {
   props: ['lesson'],
   methods: {
-    addToCart() {
-      this.$emit('add-to-cart', this.lesson._id); 
+    async addToCart() {
+      if (this.lesson.spaces > 0) {
+        try {
+          // ✅ Make API call to update backend (decrease spaces)
+          const response = await fetch(`https://extracurricula-backend.onrender.com/lessons/${this.lesson._id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ spaces: this.lesson.spaces - 1 }),
+          });
+
+          if (response.ok) {
+            this.$emit('add-to-cart', this.lesson._id);
+          } else {
+            console.error('Failed to add to cart');
+          }
+        } catch (error) {
+          console.error('Error adding to cart:', error);
+        }
+      }
     },
   },
 };
@@ -40,6 +57,17 @@ export default {
   padding: 8px 12px;
   border: none;
   border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.lesson-item button:hover {
+  background-color: #218838;
+}
+
+.lesson-item button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
 .lesson-item img {

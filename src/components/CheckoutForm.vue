@@ -4,11 +4,11 @@
     <form @submit.prevent="submitOrder">
       <div class="form-group">
         <label for="name">Name:</label>
-        <input v-model="name" id="name" type="text" placeholder="Enter your name" />
+        <input v-model="name" id="name" type="text" placeholder="Enter your name" required />
       </div>
       <div class="form-group">
         <label for="phone">Phone:</label>
-        <input v-model="phone" id="phone" type="text" placeholder="Enter your phone number" />
+        <input v-model="phone" id="phone" type="text" placeholder="Enter your phone number" required />
       </div>
       <button :disabled="!isFormValid">Place Order</button>
     </form>
@@ -18,7 +18,7 @@
 
 <script>
 export default {
-  props: ['cartItems', 'backendUrl'], // ✅ Backend URL as prop
+  props: ['cartItems'],
   data() {
     return {
       name: '',
@@ -33,7 +33,7 @@ export default {
   methods: {
     async submitOrder() {
       try {
-        const response = await fetch(`${this.backendUrl}/orders`, { // ✅ Use backend URL
+        const response = await fetch(`https://extracurricula-backend.onrender.com/orders`, { // ✅ Uses Render Backend
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -44,15 +44,15 @@ export default {
         });
 
         if (response.ok) {
-          alert('Order placed successfully!');
+          alert('✅ Order placed successfully!');
           this.$emit('order-placed'); // ✅ Emit order placed event
         } else {
-          console.error('Order failed');
-          alert('Order failed. Try again.');
+          console.error('❌ Order failed');
+          alert('⚠️ Order failed. Try again.');
         }
       } catch (error) {
-        console.error(error);
-        alert('Error occurred.');
+        console.error('❌ Error submitting order:', error);
+        alert('⚠️ An error occurred.');
       }
     },
   },
@@ -97,5 +97,20 @@ export default {
 
 .checkout-form button:disabled {
   background-color: #ccc;
+}
+
+/* Back Button */
+.back-button {
+  margin-top: 10px;
+  padding: 10px 15px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  background-color: #c82333;
 }
 </style>
