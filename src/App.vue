@@ -40,7 +40,7 @@ export default {
     return {
       cart: [], // Stores items in the cart
       isCheckingOut: false, // Tracks whether the checkout page is visible
-      backendUrl: import.meta.env.VITE_BACKEND_URL // ✅ Use environment variable
+      backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com" // ✅ Fix: Use Vue CLI environment variable
     };
   },
   methods: {
@@ -50,7 +50,7 @@ export default {
     },
     removeFromCart(_id) {
       console.log('App.vue: Removing from cart item with id:', _id);
-      this.cart = this.cart.filter(item => item._id !== _id); // ✅ Use `_id`
+      this.cart = this.cart.filter(item => item._id !== _id);
     },
     showCheckoutPage() {
       console.log('App.vue: Proceeding to checkout');
@@ -58,7 +58,7 @@ export default {
     },
     completeOrder() {
       console.log('App.vue: Order completed');
-      this.cart = []; // Clear the cart
+      this.cart = [];
       this.isCheckingOut = false;
     },
     cancelCheckout() {

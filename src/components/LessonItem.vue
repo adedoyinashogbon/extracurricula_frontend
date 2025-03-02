@@ -1,29 +1,35 @@
 <template>
   <div class="lesson-item">
     <img :src="lesson.icon || 'default-icon.png'" alt="Lesson Icon" />
-    <h3>{{ lesson.title }}</h3> <!-- ✅ Uses title instead of topic -->
+    <h3>{{ lesson.title }}</h3> 
     <p>Location: {{ lesson.location }}</p>
     <p>Price: ${{ lesson.price }}</p>
-    <p>Spaces: {{ lesson.spaces }}</p> <!-- ✅ Uses spaces instead of space -->
-    <button @click="addToCart" :disabled="lesson.spaces === 0">Add to Cart</button> <!-- ✅ Uses spaces -->
+    <p>Spaces: {{ currentSpaces }}</p> <!-- ✅ Uses computed property to track spaces -->
+    <button @click="addToCart" :disabled="currentSpaces === 0">Add to Cart</button>
   </div>
 </template>
 
 <script>
 export default {
   props: ['lesson'],
+  data() {
+    return {
+      backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com", // ✅ Uses Vue CLI `.env`
+      currentSpaces: this.lesson.spaces, // ✅ Avoids directly mutating prop
+    };
+  },
   methods: {
     async addToCart() {
-      if (this.lesson.spaces > 0) {
+      if (this.currentSpaces > 0) {
         try {
-          // ✅ Make API call to update backend (decrease spaces)
-          const response = await fetch(`https://extracurricula-backend.onrender.com/lessons/${this.lesson._id}`, {
+          const response = await fetch(`${this.backendUrl}/lessons/${this.lesson._id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ spaces: this.lesson.spaces - 1 }),
+            body: JSON.stringify({ spaces: this.currentSpaces - 1 }),
           });
 
           if (response.ok) {
+            this.currentSpaces--; // ✅ Update locally for instant UI feedback
             this.$emit('add-to-cart', this.lesson._id);
           } else {
             console.error('Failed to add to cart');

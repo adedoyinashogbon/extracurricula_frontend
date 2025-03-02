@@ -6,7 +6,7 @@
 
     <ul v-if="cartItems.length">
       <li v-for="item in cartItems" :key="item._id"> 
-        {{ item.title }} - ${{ item.price }} <!-- ✅ Uses title instead of topic -->
+        {{ item.title }} - ${{ item.price }}
         <button @click="removeFromCart(item._id)">Remove</button> 
       </li>
     </ul>
@@ -32,14 +32,14 @@ export default {
   props: ['cartItems'],
   data() {
     return {
+      backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com", // ✅ Uses Vue CLI `.env`
       isCheckout: false,
     };
   },
   methods: {
     async removeFromCart(_id) {
       try {
-        // ✅ Make API call to update backend
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/lessons/${_id}`, {
+        const response = await fetch(`${this.backendUrl}/lessons/${_id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ spaces: 1 }), // ✅ Increase space by 1 when removing

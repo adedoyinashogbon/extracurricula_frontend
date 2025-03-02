@@ -6,9 +6,9 @@
     <div class="lesson-controls">
       <label for="sort">Sort By:</label>
       <select id="sort" v-model="sortBy" @change="sortLessons">
-        <option value="title">Title</option> <!-- ✅ Uses title as in MongoDB -->
+        <option value="title">Title</option> 
         <option value="price">Price</option>
-        <option value="spaces">Available Spaces</option> <!-- ✅ Uses spaces as in MongoDB -->
+        <option value="spaces">Available Spaces</option> 
       </select>
       <button @click="toggleSortOrder">
         <i :class="isAscending ? 'fas fa-sort-amount-up' : 'fas fa-sort-amount-down'"></i>
@@ -44,9 +44,10 @@ export default {
     return {
       lessons: [],
       filteredLessons: [],
-      sortBy: 'title', // ✅ Uses title as in MongoDB
+      sortBy: 'title', 
       isAscending: true,
       searchQuery: '',
+      backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com", // ✅ Fixed for Vue CLI
     };
   },
   created() {
@@ -55,9 +56,9 @@ export default {
   methods: {
     async fetchLessons() {
       try {
-        const response = await fetch(`https://extracurricula-backend.onrender.com/lessons`); // ✅ Uses Render backend URL
+        const response = await fetch(`${this.backendUrl}/lessons`); // ✅ Uses Vue CLI .env variable
         const data = await response.json();
-        this.lessons = data; // ✅ No need to modify icons
+        this.lessons = data; 
         this.filteredLessons = [...this.lessons];
       } catch (error) {
         console.error('Error fetching lessons:', error);
@@ -82,7 +83,7 @@ export default {
       this.sortLessons();
     },
     addToCart(lesson) {
-      if (lesson.spaces > 0) { // ✅ Uses spaces as in MongoDB
+      if (lesson.spaces > 0) { 
         lesson.spaces -= 1;
         this.$emit('add-to-cart', lesson._id);
       }
