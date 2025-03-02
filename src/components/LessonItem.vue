@@ -23,16 +23,20 @@ export default {
   props: ["lesson"],
   computed: {
     /**
-     * ✅ Fix: Compute the correct image path
-     * - Removes duplicate `/icons/icons/`
-     * - Uses a fallback if the image is missing
+     * ✅ Fix: Compute the correct image path dynamically
+     * - Ensures correct path for GitHub Pages (`extracurricula_frontend`)
+     * - Ensures correct path for local development (`localhost`)
      */
     computedImageUrl() {
-      if (!this.lesson.icon) return "/icons/default-icon.png"; // ✅ Default image fallback
+      const basePath = process.env.NODE_ENV === "production"
+        ? "/extracurricula_frontend/"  // ✅ GitHub Pages Repo Name
+        : "/";
+
+      if (!this.lesson.icon) return `${basePath}icons/default-icon.png`; // ✅ Default image fallback
 
       return this.lesson.icon.startsWith("/icons/") 
-        ? this.lesson.icon 
-        : `/icons/${this.lesson.icon.replace(/^\/+/, "")}`;
+        ? `${basePath}${this.lesson.icon.replace(/^\/+/, "")}` 
+        : `${basePath}icons/${this.lesson.icon.replace(/^\/+/, "")}`;
     }
   },
   methods: {
