@@ -7,7 +7,7 @@
     <ul v-if="cartItems.length">
       <li v-for="item in cartItems" :key="item._id"> 
         {{ item.title }} - ${{ item.price }}
-        <button @click="removeFromCart(item._id)">Remove</button> 
+        <button @click="removeFromCart(item)">Remove</button> 
       </li>
     </ul>
 
@@ -37,21 +37,21 @@ export default {
     };
   },
   methods: {
-    async removeFromCart(_id) {
+    async removeFromCart(item) {
       try {
-        const response = await fetch(`${this.backendUrl}/lessons/${_id}`, {
+        const response = await fetch(`${this.backendUrl}/lessons/${item._id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ spaces: 1 }), // ✅ Increase space by 1 when removing
+          body: JSON.stringify({ spaces: item.spaces + 1 }), // ✅ Increase space by 1 when removing
         });
 
         if (response.ok) {
-          this.$emit('remove-from-cart', _id);
+          this.$emit('remove-from-cart', item._id);
         } else {
-          console.error('Failed to remove item from cart');
+          console.error('❌ Failed to remove item from cart');
         }
       } catch (error) {
-        console.error('Error removing item from cart:', error);
+        console.error('❌ Error removing item from cart:', error);
       }
     },
     toggleCheckout() {

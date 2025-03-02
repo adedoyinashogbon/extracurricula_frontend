@@ -47,7 +47,7 @@ export default {
       sortBy: 'title', 
       isAscending: true,
       searchQuery: '',
-      backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com", // ✅ Fixed for Vue CLI
+      backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com",
     };
   },
   created() {
@@ -56,7 +56,7 @@ export default {
   methods: {
     async fetchLessons() {
       try {
-        const response = await fetch(`${this.backendUrl}/lessons`); // ✅ Uses Vue CLI .env variable
+        const response = await fetch(`${this.backendUrl}/lessons`);
         const data = await response.json();
         this.lessons = data; 
         this.filteredLessons = [...this.lessons];
@@ -82,10 +82,24 @@ export default {
       );
       this.sortLessons();
     },
-    addToCart(lesson) {
+    async addToCart(lesson) {
       if (lesson.spaces > 0) { 
-        lesson.spaces -= 1;
-        this.$emit('add-to-cart', lesson._id);
+        try {
+          const response = await fetch(`${this.backendUrl}/lessons/${lesson._id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ spaces: lesson.spaces - 1 }),
+          });
+
+          if (response.ok) {
+            lesson.spaces -= 1; // ✅ Update lesson space locally
+            this.$emit('add-to-cart', { ...lesson }); // ✅ Ensure reactivity
+          } else {
+            console.error('❌ Failed to update lesson spaces on the backend');
+          }
+        } catch (error) {
+          console.error('❌ Error updating lesson:', error);
+        }
       }
     },
   },

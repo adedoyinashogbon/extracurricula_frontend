@@ -38,19 +38,55 @@ export default {
   components: { LessonList, ShoppingCart, CheckoutForm },
   data() {
     return {
-      cart: [], // Stores items in the cart
-      isCheckingOut: false, // Tracks whether the checkout page is visible
-      backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com" // ✅ Fix: Use Vue CLI environment variable
+      cart: [], // ✅ Reactive cart array
+      isCheckingOut: false, // ✅ Tracks checkout state
+      backendUrl: process.env.VUE_APP_BACKEND_URL || "https://extracurricula-backend.onrender.com"
     };
   },
   methods: {
-    addToCart(lesson) {
+    async addToCart(lesson) {
       console.log('App.vue: Adding to cart:', lesson);
-      this.cart.push(lesson);
+
+      try {
+        const response = await fetch(`${this.backendUrl}/lessons/${lesson._id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ spaces: lesson.spaces - 1 }),
+        });
+
+        if (response.ok) {
+          lesson.spaces -= 1; // ✅ Update local lesson space count
+          this.cart.push({ ...lesson }); // ✅ Ensures reactivity
+          this.cart = [...this.cart]; // ✅ Vue detects array changes
+        } else {
+          console.error('❌ Failed to update lesson spaces on the backend');
+        }
+      } catch (error) {
+        console.error('❌ Error updating lesson:', error);
+      }
     },
-    removeFromCart(_id) {
-      console.log('App.vue: Removing from cart item with id:', _id);
-      this.cart = this.cart.filter(item => item._id !== _id);
+    async removeFromCart(_id) {
+      console.log('App.vue: Removing from cart:', _id);
+
+      try {
+        const lessonToRemove = this.cart.find(item => item._id === _id);
+
+        if (lessonToRemove) {
+          const response = await fetch(`${this.backendUrl}/lessons/${_id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ spaces: lessonToRemove.spaces + 1 }), // ✅ Increase space back when removing
+          });
+
+          if (response.ok) {
+            this.cart = this.cart.filter(item => item._id !== _id);
+          } else {
+            console.error('❌ Failed to restore lesson space on the backend');
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error removing item from cart:', error);
+      }
     },
     showCheckoutPage() {
       console.log('App.vue: Proceeding to checkout');
@@ -58,7 +94,7 @@ export default {
     },
     completeOrder() {
       console.log('App.vue: Order completed');
-      this.cart = [];
+      this.cart = []; // ✅ Clear the cart after checkout
       this.isCheckingOut = false;
     },
     cancelCheckout() {
