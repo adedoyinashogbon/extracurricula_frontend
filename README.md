@@ -84,3 +84,7 @@ VUE_APP_BACKEND_URL=http://localhost:4000
 
 The application is deployed on GitHub Pages at:
 https://adedoyinashogbon.github.io/extracurricula_frontend/
+
+## 📝 License
+
+This project is licensed under the [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/) license.
